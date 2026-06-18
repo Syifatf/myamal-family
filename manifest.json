@@ -1,8 +1,7 @@
 {
   "name": "My Amal",
   "short_name": "My Amal",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1D9E75",
