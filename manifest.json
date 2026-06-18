@@ -1,6 +1,8 @@
 {
   "name": "My Amal",
   "short_name": "My Amal",
+  "id": "my-amal",
+  "description": "Track amalan harian bersama keluarga",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
