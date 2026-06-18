@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="apple-mobile-web-app-title" content="My Amal"/>
 <title>My Amal</title>
-<link rel="manifest" id="manifest-link"/>
+<link rel="manifest" href="manifest.json"/>
 <style>
 :root{
   --green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;
@@ -743,23 +743,9 @@ if(load()&&S.myId&&S.members[S.myId]){
   enterApp();
 }
 
-// Manifest inline
-const manifest={name:'My Amal',short_name:'My Amal',start_url:'./',display:'standalone',
-  background_color:'#ffffff',theme_color:'#1D9E75',
-  icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="%231D9E75"/><text y=".9em" font-size="80" x="10">🌙</text></svg>',sizes:'192x192',type:'image/svg+xml'}]};
-const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
-document.getElementById('manifest-link').href=URL.createObjectURL(blob);
-
 // Service Worker
 if('serviceWorker' in navigator){
-  const sw=`
-const CACHE='amalan-v1';
-const ASSETS=['./',location.href];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
-self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
-`;
-  const swBlob=new Blob([sw],{type:'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 </script>
 </body>
