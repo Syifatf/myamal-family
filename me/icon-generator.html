@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Icon Generator</title>
+<style>
+body{margin:0;padding:20px;background:#f0f0ee;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;gap:16px}
+canvas{display:none}
+.preview{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;align-items:flex-end}
+.prev-item{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:#666}
+.prev-item img{border-radius:22%;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+button{background:#1D9E75;color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+button:hover{background:#0F6E56}
+</style>
+</head>
+<body>
+<div class="preview" id="preview"></div>
+<button onclick="downloadAll()">⬇ Download Semua Icon</button>
+<script>
+const SIZES=[512,192,180,152,120,76];
+const svgStr=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#1D9E75"/>
+  <rect width="512" height="512" rx="112" fill="#17876A" opacity="0.4"/>
+  <!-- Star/sparkle top right -->
+  <circle cx="370" cy="120" r="8" fill="#9FE1CB"/>
+  <circle cx="395" cy="98" r="5" fill="#9FE1CB" opacity="0.7"/>
+  <circle cx="350" cy="98" r="4" fill="#9FE1CB" opacity="0.5"/>
+  <!-- Crescent moon -->
+  <path d="M256 110 C190 110 148 158 148 222 C148 290 196 338 256 338 C300 338 336 314 354 278 C338 284 318 286 298 280 C248 264 220 214 230 164 C236 138 246 120 256 110Z" fill="#E1F5EE"/>
+  <!-- Small stars left -->
+  <circle cx="148" cy="180" r="6" fill="#9FE1CB" opacity="0.8"/>
+  <circle cx="130" cy="210" r="4" fill="#9FE1CB" opacity="0.5"/>
+  <!-- Checklist lines -->
+  <rect x="176" y="370" width="160" height="18" rx="9" fill="#E1F5EE" opacity="0.9"/>
+  <rect x="176" y="400" width="120" height="18" rx="9" fill="#E1F5EE" opacity="0.7"/>
+  <rect x="176" y="430" width="140" height="18" rx="9" fill="#E1F5EE" opacity="0.5"/>
+  <!-- Checkmarks -->
+  <circle cx="160" cy="379" r="11" fill="#9FE1CB"/>
+  <path d="M154 379 L158 383 L167 374" stroke="#085041" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="160" cy="409" r="11" fill="#9FE1CB"/>
+  <path d="M154 409 L158 413 L167 404" stroke="#085041" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="160" cy="439" r="11" fill="#5DCAA5" opacity="0.6"/>
+</svg>`;
+
+function renderIcon(size){
+  return new Promise(resolve=>{
+    const canvas=document.createElement('canvas');
+    canvas.width=size;canvas.height=size;
+    const ctx=canvas.getContext('2d');
+    const img=new Image();
+    const blob=new Blob([svgStr],{type:'image/svg+xml'});
+    const url=URL.createObjectURL(blob);
+    img.onload=()=>{
+      ctx.drawImage(img,0,0,size,size);
+      URL.revokeObjectURL(url);
+      resolve({canvas,size});
+    };
+    img.src=url;
+  });
+}
+
+async function init(){
+  const preview=document.getElementById('preview');
+  for(const size of SIZES){
+    const {canvas}=await renderIcon(size);
+    const dataUrl=canvas.toDataURL('image/png');
+    const wrap=document.createElement('div');
+    wrap.className='prev-item';
+    const imgEl=document.createElement('img');
+    imgEl.src=dataUrl;
+    const displaySize=Math.min(size,96);
+    imgEl.width=displaySize;imgEl.height=displaySize;
+    imgEl.style.borderRadius=Math.round(displaySize*0.22)+'px';
+    const label=document.createElement('div');
+    label.textContent=size+'×'+size;
+    wrap.appendChild(imgEl);wrap.appendChild(label);
+    preview.appendChild(wrap);
+  }
+}
+
+async function downloadAll(){
+  for(const size of SIZES){
+    const {canvas}=await renderIcon(size);
+    const a=document.createElement('a');
+    a.href=canvas.toDataURL('image/png');
+    a.download='amalan-icon-'+size+'x'+size+'.png';
+    a.click();
+    await new Promise(r=>setTimeout(r,300));
+  }
+}
+
+init();
+</script>
+</body>
+</html>
