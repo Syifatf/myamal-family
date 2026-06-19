@@ -102,6 +102,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .s-miss{background:var(--red);color:#fff}
 .s-haid{background:var(--pink);color:#fff}
 .s-skip{background:var(--gray);color:#fff}
+.cell-hdr{background:var(--bg2);color:var(--text2);cursor:default;flex-direction:column;gap:1px;height:34px;line-height:1.1;padding:3px 0;pointer-events:none;font-weight:600}
+.am-row-header{border-bottom:2px solid var(--border);margin-bottom:4px;padding-bottom:4px}
+.am-row-header .am-name{font-size:11px;color:var(--text2);font-weight:600;min-width:80px}
 /* ADD ROW */
 .add-row{display:flex;gap:8px;margin-top:16px}
 .add-row input{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:14px;color:var(--text);outline:none}
@@ -529,6 +532,13 @@ function renderAll(){
   renderTracker();renderStats();
 }
 
+const DAY_NAMES = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const DAY_FULL = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+
+function dayLabel(d) {
+  return DAY_FULL[new Date(curY, curM, d).getDay()] + ', ' + d + ' ' + MONTHS[curM] + ' ' + curY;
+}
+
 function renderTracker(){
   const uid=viewUid||S.myId;
   const isOwn=uid===S.myId;
@@ -538,7 +548,28 @@ function renderTracker(){
   const isTM=now.getFullYear()===curY&&now.getMonth()===curM;
   const todayD=isTM?now.getDate():days+1;
   document.getElementById('add-row').style.display=isOwn?'flex':'none';
+
+  // Save scroll positions
+  const scrollPos = [];
+  document.querySelectorAll('#p-tracker .am-scroll').forEach(el => scrollPos.push(el.scrollLeft));
+
   const el=document.getElementById('amalan-list');el.innerHTML='';
+
+  // Header row: date + day name
+  const hdrRow=document.createElement('div');hdrRow.className='am-row am-row-header';
+  const hdrName=document.createElement('div');hdrName.className='am-name';hdrName.textContent='Hari';
+  hdrRow.appendChild(hdrName);
+  const hdrScroll=document.createElement('div');hdrScroll.className='am-scroll';
+  const hdrCells=document.createElement('div');hdrCells.className='am-cells';
+  for(let d=1;d<=days;d++){
+    const cell=document.createElement('div');
+    cell.className='cell cell-hdr';
+    cell.innerHTML='<span>'+d+'</span><span style="font-size:8px;opacity:0.6">'+DAY_NAMES[new Date(curY,curM,d).getDay()]+'</span>';
+    hdrCells.appendChild(cell);
+  }
+  hdrScroll.appendChild(hdrCells);hdrRow.appendChild(hdrScroll);el.appendChild(hdrRow);
+
+  // Amalan rows
   ams.forEach(am=>{
     const row=document.createElement('div');row.className='am-row';
     const nd=document.createElement('div');nd.className='am-name';nd.textContent=am;row.appendChild(nd);
@@ -548,12 +579,17 @@ function renderTracker(){
       const s=S.data[dk(curY,curM,d,uid,am)]||'empty';
       const isFut=d>todayD;
       const btn=document.createElement('button');
-      btn.className='cell '+SCLS[s];btn.textContent=LABELS[s];btn.title='Hari '+d;
+      btn.className='cell '+SCLS[s];btn.textContent=LABELS[s];btn.title=dayLabel(d);
       if(isFut||!isOwn)btn.disabled=true;
       else btn.onclick=()=>cycleCell(curY,curM,d,uid,am);
       cd.appendChild(btn);
     }
     sd.appendChild(cd);row.appendChild(sd);el.appendChild(row);
+  });
+
+  // Restore scroll positions
+  document.querySelectorAll('#p-tracker .am-scroll').forEach((el,i)=>{
+    if(scrollPos[i]!==undefined)el.scrollLeft=scrollPos[i];
   });
 }
 
