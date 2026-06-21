@@ -133,6 +133,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-right:4px}
 .badge-admin{background:var(--green-light);color:var(--green-dark)}
 .badge-haid{background:var(--pink-light);color:var(--pink)}
+.badge-pria{background:var(--gray-light);color:var(--text2)}
+.badge-wanita{background:var(--pink-light);color:var(--pink)}
+.gender-opt{display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);flex:1;justify-content:center;font-size:14px;font-weight:500;background:var(--bg);transition:.15s}
+.gender-opt input{display:none}
+.gender-opt:has(input:checked){border-color:var(--green);background:var(--green-light);color:var(--green)}
 /* SETTINGS */
 .section-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin:20px 0 8px}
 .am-manage-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
@@ -174,6 +179,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     <div class="form-group">
       <label>Nama kamu</label>
       <input type="text" id="inp-name" placeholder="Contoh: Bunda, Ayah, Aisyah..." maxlength="20" autocomplete="off"/>
+    </div>
+    <div class="form-group">
+      <label>Jenis kelamin</label>
+      <div style="display:flex;gap:8px">
+        <label class="gender-opt"><input type="radio" name="gender-onboard" value="pria" checked/><span>👨 Pria</span></label>
+        <label class="gender-opt"><input type="radio" name="gender-onboard" value="wanita"/><span>👩 Wanita</span></label>
+      </div>
     </div>
     <button class="btn-primary" onclick="createGroup()">＋ Buat grup baru</button>
     <div class="divider">atau gabung grup yang ada</div>
@@ -284,6 +296,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
         <input type="text" id="edit-name" placeholder="Ganti nama..." maxlength="20"
           style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:14px;color:var(--text);outline:none"/>
         <button onclick="saveName()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer">Simpan</button>
+      </div>
+    </div>
+    <div class="section-label">Jenis kelamin</div>
+    <div class="card">
+      <div style="display:flex;gap:8px">
+        <label class="gender-opt" id="gender-pria-label"><input type="radio" name="gender-settings" value="pria" onchange="saveGender()"/><span>👨 Pria</span></label>
+        <label class="gender-opt" id="gender-wanita-label"><input type="radio" name="gender-settings" value="wanita" onchange="saveGender()"/><span>👩 Wanita</span></label>
       </div>
     </div>
     <div class="section-label">Warna avatar</div>
@@ -431,6 +450,8 @@ function migrateOldData(){
       if (clean !== dk) { S.haidDays[uid][clean] = S.haidDays[uid][dk]; delete S.haidDays[uid][dk]; fixed = true; }
     });
   });
+  // Migrasi gender untuk member lama
+  Object.values(S.members).forEach(m => { if(!m.gender){m.gender='wanita';fixed=true;} });
   if (fixed) save();
 }
 
@@ -443,9 +464,10 @@ function av(uid){const i=(S.colorIdx[uid]||0)%AVATARS.length;return AVATARS[i];}
 
 function createGroup(){
   const n=document.getElementById('inp-name').value.trim();
+  const g=document.querySelector('input[name="gender-onboard"]:checked')?.value||'wanita';
   if(!n){toast('Masukkan namamu dulu ya');return;}
   S.myId=genId();S.myName=n;S.groupCode=genCode();S.groupName='Keluarga '+n;
-  S.members[S.myId]={name:n,joined:Date.now()};
+  S.members[S.myId]={name:n,gender:g,joined:Date.now()};
   S.amalan[S.myId]=[...DEF_AMALAN];
   S.colorIdx[S.myId]=0;S.haidDays[S.myId]={};
   viewUid=S.myId;save();enterApp();
@@ -460,25 +482,82 @@ function createGroup(){
 function joinGroup(){
   const n=document.getElementById('inp-name').value.trim();
   const code=document.getElementById('inp-code').value.trim().toUpperCase();
+  const g=document.querySelector('input[name="gender-onboard"]:checked')?.value||'wanita';
   if(!n){toast('Masukkan namamu dulu');return;}
   if(code.length!==4){toast('Kode harus 4 huruf');return;}
   S.myId=genId();S.myName=n;S.groupCode=code;
   const existing=localStorage.getItem('amalan_group_'+code);
-  if(existing){try{const g=JSON.parse(existing);Object.assign(S,g);}catch(e){}}
-  if(!S.groupName)S.groupName='Keluarga';
-  S.members[S.myId]={name:n,joined:Date.now()};
-  S.amalan[S.myId]=[...DEF_AMALAN];
-  S.colorIdx[S.myId]=Object.keys(S.members).length%AVATARS.length;
-  S.haidDays[S.myId]={};
+  if(existing){try{const g2=JSON.parse(existing);Object.assign(S,g2);}catch(e){}}
+  // Recovery: cek di localStorage apakah user punya data dengan nama ini
+  let recovered=false;
+  Object.entries(S.members).forEach(([uid,m])=>{
+    if(m.name===n&&!recovered&&uid!==S.myId){
+      S.myId=uid;S.myName=m.name;S.colorIdx[uid]=S.colorIdx[uid]||0;
+      if(!S.amalan[uid])S.amalan[uid]=[...DEF_AMALAN];
+      if(!S.haidDays[uid])S.haidDays[uid]={};
+      recovered=true;
+    }
+  });
+  if(!recovered){
+    if(!S.groupName)S.groupName='Keluarga';
+    S.members[S.myId]={name:n,gender:g,joined:Date.now()};
+    S.amalan[S.myId]=[...DEF_AMALAN];
+    S.colorIdx[S.myId]=Object.keys(S.members).length%AVATARS.length;
+    S.haidDays[S.myId]={};
+  }
   viewUid=S.myId;save();
   localStorage.setItem('amalan_group_'+code,JSON.stringify(S));
   enterApp();
   initFirebase();
-  fbWrite('members/' + S.myId, S.members[S.myId]);
-  fbWrite('amalan/' + S.myId, S.amalan[S.myId]);
-  fbWrite('colorIdx/' + S.myId, S.colorIdx[S.myId]);
-  fbWrite('haidDays/' + S.myId, S.haidDays[S.myId]);
+  // Listen dulu untuk sync data dari Firebase
   listenGroup(S.groupCode);
+  // Coba recovery dari Firebase setelah listener mendapat data
+  if(fbDb&&!recovered){
+    fbDb.ref('groups/'+code+'/members').once('value').then(snap=>{
+      const fbMembers=snap.val()||{};
+      let fbRecover=false;
+      Object.entries(fbMembers).forEach(([uid,m])=>{
+        if(m.name===n&&!fbRecover&&uid!==S.myId){
+          fbRecover=true;
+          // Pindah ke akun lama
+          const oldId=S.myId;
+          if(S.members[oldId])delete S.members[oldId];
+          S.myId=uid;S.myName=m.name;
+          // Ambil data lama dari Firebase
+          fbDb.ref('groups/'+code+'/amalan/'+uid).once('value').then(s2=>{
+            if(s2.val())S.amalan[uid]=s2.val();
+            fbDb.ref('groups/'+code+'/data').once('value').then(s3=>{
+              if(s3.val())S.data=s3.val();
+              fbDb.ref('groups/'+code+'/haidDays/'+uid).once('value').then(s4=>{
+                if(s4.val())S.haidDays[uid]=s4.val();
+                fbDb.ref('groups/'+code+'/colorIdx/'+uid).once('value').then(s5=>{
+                  if(s5.val()!==null)S.colorIdx[uid]=s5.val();
+                  S.members[uid]=m;save();renderAll();
+                  toast('Akun "'+n+'" dipulihkan!');
+                });
+              });
+            });
+          });
+        }
+      });
+      if(!fbRecover&&!recovered){
+        // Beneran baru — kirim data ke Firebase
+        fbWrite('members/'+S.myId,S.members[S.myId]);
+        fbWrite('amalan/'+S.myId,S.amalan[S.myId]);
+        fbWrite('colorIdx/'+S.myId,S.colorIdx[S.myId]);
+        fbWrite('haidDays/'+S.myId,S.haidDays[S.myId]);
+        localStorage.setItem('amalan_group_'+code,JSON.stringify(S));
+      }
+    }).catch(()=>{
+      // Fallback: jika tidak bisa baca Firebase
+      if(!recovered){
+        fbWrite('members/'+S.myId,S.members[S.myId]);
+        fbWrite('amalan/'+S.myId,S.amalan[S.myId]);
+        fbWrite('colorIdx/'+S.myId,S.colorIdx[S.myId]);
+        fbWrite('haidDays/'+S.myId,S.haidDays[S.myId]);
+      }
+    });
+  }
 }
 
 function enterApp(){
@@ -534,9 +613,10 @@ function renderMtabs(id){
 function renderAll(){
   const uid=viewUid||S.myId;
   const isOwn=uid===S.myId;
-  // Haid bar
+  const myMem=S.members[S.myId];
+  // Haid bar — hanya untuk wanita
   const hb=document.getElementById('haid-bar');
-  if(isOwn){
+  if(isOwn&&myMem&&myMem.gender==='wanita'){
     hb.style.display='flex';
     const now=new Date();
     const k=now.getFullYear()+'-'+now.getMonth()+'-'+now.getDate();
@@ -686,21 +766,30 @@ function renderGroup(){
   Object.entries(S.members).forEach(([uid,m],i)=>{
     const a=av(uid);
     const haidNow=Object.values(S.haidDays[uid]||{}).some(v=>v);
+    const genderBadge=m.gender==='pria'?'<span class="badge badge-pria">👨 Pria</span>':'<span class="badge badge-wanita">👩 Wanita</span>';
     const item=document.createElement('div');item.className='member-item';
     item.innerHTML='<div class="avatar" style="background:'+a.bg+';color:'+a.col+'">'+initials(m.name)+'</div>'+
       '<div style="flex:1"><div class="mi-name">'+m.name+(uid===S.myId?' <span style="font-size:11px;font-weight:400;color:var(--text2)">(kamu)</span>':'')+'</div>'+
       '<div class="mi-role">'+(i===0?'<span class="badge badge-admin">Admin</span>':'')+
-      (haidNow?'<span class="badge badge-haid">Haid</span>':'')+'</div></div>';
+      genderBadge+(haidNow?'<span class="badge badge-haid">Haid</span>':'')+'</div></div>';
     el.appendChild(item);
   });
 }
 
 function renderSettings(){
   const a=av(S.myId);
+  const myMem=S.members[S.myId];
+  const myName=S.myName;
+  const myGender=myMem?.gender||'wanita';
   const myAv=document.getElementById('my-av');
   myAv.style.background=a.bg;myAv.style.color=a.col;myAv.style.width='48px';myAv.style.height='48px';myAv.style.fontSize='16px';
-  myAv.textContent=initials(S.myName);
-  document.getElementById('my-name-disp').textContent=S.myName;
+  myAv.textContent=initials(myName);
+  document.getElementById('my-name-disp').textContent=myName+(myGender==='pria'?' 👨':' 👩');
+  // Gender radio
+  const pria=document.getElementById('gender-pria-label')?.querySelector('input');
+  const wanita=document.getElementById('gender-wanita-label')?.querySelector('input');
+  if(pria)pria.checked=myGender==='pria';
+  if(wanita)wanita.checked=myGender==='wanita';
   const cp=document.getElementById('color-picker');cp.innerHTML='';
   AVATARS.forEach((c,i)=>{
     const btn=document.createElement('button');
@@ -750,6 +839,14 @@ function saveName(){
   if(!n)return;
   S.myName=n;S.members[S.myId].name=n;
   document.getElementById('edit-name').value='';save();renderAll();renderSettings();
+  fbWrite('members/' + S.myId, S.members[S.myId]);
+}
+
+function saveGender(){
+  const g=document.querySelector('input[name="gender-settings"]:checked')?.value;
+  if(!g||!S.members[S.myId])return;
+  S.members[S.myId].gender=g;
+  save();renderAll();renderSettings();
   fbWrite('members/' + S.myId, S.members[S.myId]);
 }
 
