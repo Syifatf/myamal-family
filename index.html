@@ -367,9 +367,13 @@ function onFbUpdate(snap) {
     });
   }
   if (val.data) {
+    let hadEncoded = false;
     Object.keys(val.data).forEach(k => {
-      if (S.data[k] !== val.data[k]) { S.data[k] = val.data[k]; changed = true; }
+      const dk = k.includes('%') ? decodeURIComponent(k) : k;
+      if (S.data[dk] !== val.data[k]) { S.data[dk] = val.data[k]; changed = true; }
+      if (dk !== k) { hadEncoded = true; delete val.data[k]; }
     });
+    if (hadEncoded && fbDb) fbDb.ref('groups/' + S.groupCode + '/data').set(S.data).catch(() => {});
   }
   if (val.haidDays) {
     Object.keys(val.haidDays).forEach(uid => {
@@ -412,6 +416,22 @@ function load(){
     if(raw){S=JSON.parse(raw);return true;}
   }catch(e){}
   return false;
+}
+
+function migrateOldData(){
+  // Fix any encoded keys from older versions
+  let fixed = false;
+  Object.keys(S.data).forEach(k => {
+    const dk = decodeURIComponent(k);
+    if (dk !== k) { S.data[dk] = S.data[k]; delete S.data[k]; fixed = true; }
+  });
+  Object.keys(S.haidDays).forEach(uid => {
+    Object.keys(S.haidDays[uid] || {}).forEach(dk => {
+      const clean = decodeURIComponent(dk);
+      if (clean !== dk) { S.haidDays[uid][clean] = S.haidDays[uid][dk]; delete S.haidDays[uid][dk]; fixed = true; }
+    });
+  });
+  if (fixed) save();
 }
 
 function genCode(){return Math.random().toString(36).substr(2,4).toUpperCase();}
@@ -598,7 +618,7 @@ function cycleCell(y,m,d,uid,am){
   const cur=S.data[k]||'empty';
   S.data[k]=STATUSES[(STATUSES.indexOf(cur)+1)%STATUSES.length];
   save();renderTracker();renderStats();
-  fbWrite('data/' + encodeURIComponent(k), S.data[k]);
+  fbWrite('data/' + k, S.data[k]);
 }
 
 function renderStats(){
@@ -773,6 +793,7 @@ function toast(msg){
 
 // Init
 if(load()&&S.myId&&S.members[S.myId]){
+  migrateOldData();
   viewUid=S.myId;
   initFirebase();
   if (S.groupCode) listenGroup(S.groupCode);
