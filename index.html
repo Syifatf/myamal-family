@@ -479,26 +479,51 @@ function createGroup(){
   listenGroup(S.groupCode);
 }
 
-function joinGroup(){
+async function joinGroup(){
   const n=document.getElementById('inp-name').value.trim();
   const code=document.getElementById('inp-code').value.trim().toUpperCase();
   const g=document.querySelector('input[name="gender-onboard"]:checked')?.value||'wanita';
   if(!n){toast('Masukkan namamu dulu');return;}
   if(code.length!==4){toast('Kode harus 4 huruf');return;}
-  S.myId=genId();S.myName=n;S.groupCode=code;
-  const existing=localStorage.getItem('amalan_group_'+code);
-  if(existing){try{const g2=JSON.parse(existing);Object.assign(S,g2);}catch(e){}}
-  // Recovery: cek di localStorage apakah user punya data dengan nama ini
+  S.groupCode=code;S.myName=n;
+  initFirebase();
   let recovered=false;
-  Object.entries(S.members).forEach(([uid,m])=>{
-    if(m.name===n&&!recovered&&uid!==S.myId){
-      S.myId=uid;S.myName=m.name;S.colorIdx[uid]=S.colorIdx[uid]||0;
-      if(!S.amalan[uid])S.amalan[uid]=[...DEF_AMALAN];
-      if(!S.haidDays[uid])S.haidDays[uid]={};
-      recovered=true;
+  try{
+    const snap=await fbDb.ref('groups/'+code).once('value');
+    const grp=snap.val();
+    if(grp&&grp.members){
+      Object.entries(grp.members).forEach(([uid,m])=>{
+        if(m.name===n&&!recovered){
+          recovered=true;
+          S.myId=uid;S.groupName=grp.groupName||('Keluarga '+n);
+          S.members=grp.members;S.amalan=grp.amalan||{};
+          S.data=grp.data||{};S.haidDays=grp.haidDays||{};
+          S.colorIdx=grp.colorIdx||{};
+          if(!S.amalan[uid])S.amalan[uid]=[...DEF_AMALAN];
+          if(!S.haidDays[uid])S.haidDays[uid]={};
+          if(S.colorIdx[uid]===undefined)S.colorIdx[uid]=0;
+        }
+      });
     }
-  });
-  if(!recovered){
+    if(!recovered){
+      S.myId=genId();S.groupName=grp?.groupName||'Keluarga '+n;
+      S.members=grp?.members||{};S.amalan=grp?.amalan||{};
+      S.data=grp?.data||{};S.haidDays=grp?.haidDays||{};
+      S.colorIdx=grp?.colorIdx||{};
+      S.members[S.myId]={name:n,gender:g,joined:Date.now()};
+      S.amalan[S.myId]=[...DEF_AMALAN];
+      S.colorIdx[S.myId]=Object.keys(S.members).length%AVATARS.length;
+      S.haidDays[S.myId]={};
+      fbWrite('members/'+S.myId,S.members[S.myId]);
+      fbWrite('amalan/'+S.myId,S.amalan[S.myId]);
+      fbWrite('colorIdx/'+S.myId,S.colorIdx[S.myId]);
+      fbWrite('haidDays/'+S.myId,S.haidDays[S.myId]);
+    }
+  }catch(e){
+    // Fallback: Firebase error
+    S.myId=genId();
+    const existing=localStorage.getItem('amalan_group_'+code);
+    if(existing){try{const g2=JSON.parse(existing);Object.assign(S,g2);}catch(e){}}
     if(!S.groupName)S.groupName='Keluarga';
     S.members[S.myId]={name:n,gender:g,joined:Date.now()};
     S.amalan[S.myId]=[...DEF_AMALAN];
@@ -508,56 +533,8 @@ function joinGroup(){
   viewUid=S.myId;save();
   localStorage.setItem('amalan_group_'+code,JSON.stringify(S));
   enterApp();
-  initFirebase();
-  // Listen dulu untuk sync data dari Firebase
-  listenGroup(S.groupCode);
-  // Coba recovery dari Firebase setelah listener mendapat data
-  if(fbDb&&!recovered){
-    fbDb.ref('groups/'+code+'/members').once('value').then(snap=>{
-      const fbMembers=snap.val()||{};
-      let fbRecover=false;
-      Object.entries(fbMembers).forEach(([uid,m])=>{
-        if(m.name===n&&!fbRecover&&uid!==S.myId){
-          fbRecover=true;
-          // Pindah ke akun lama
-          const oldId=S.myId;
-          if(S.members[oldId])delete S.members[oldId];
-          S.myId=uid;S.myName=m.name;
-          // Ambil data lama dari Firebase
-          fbDb.ref('groups/'+code+'/amalan/'+uid).once('value').then(s2=>{
-            if(s2.val())S.amalan[uid]=s2.val();
-            fbDb.ref('groups/'+code+'/data').once('value').then(s3=>{
-              if(s3.val())S.data=s3.val();
-              fbDb.ref('groups/'+code+'/haidDays/'+uid).once('value').then(s4=>{
-                if(s4.val())S.haidDays[uid]=s4.val();
-                fbDb.ref('groups/'+code+'/colorIdx/'+uid).once('value').then(s5=>{
-                  if(s5.val()!==null)S.colorIdx[uid]=s5.val();
-                  S.members[uid]=m;save();renderAll();
-                  toast('Akun "'+n+'" dipulihkan!');
-                });
-              });
-            });
-          });
-        }
-      });
-      if(!fbRecover&&!recovered){
-        // Beneran baru — kirim data ke Firebase
-        fbWrite('members/'+S.myId,S.members[S.myId]);
-        fbWrite('amalan/'+S.myId,S.amalan[S.myId]);
-        fbWrite('colorIdx/'+S.myId,S.colorIdx[S.myId]);
-        fbWrite('haidDays/'+S.myId,S.haidDays[S.myId]);
-        localStorage.setItem('amalan_group_'+code,JSON.stringify(S));
-      }
-    }).catch(()=>{
-      // Fallback: jika tidak bisa baca Firebase
-      if(!recovered){
-        fbWrite('members/'+S.myId,S.members[S.myId]);
-        fbWrite('amalan/'+S.myId,S.amalan[S.myId]);
-        fbWrite('colorIdx/'+S.myId,S.colorIdx[S.myId]);
-        fbWrite('haidDays/'+S.myId,S.haidDays[S.myId]);
-      }
-    });
-  }
+  listenGroup(code);
+  if(recovered)toast('Akun "'+n+'" dipulihkan!');
 }
 
 function enterApp(){
