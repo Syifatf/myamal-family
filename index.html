@@ -278,7 +278,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       <h3>Anggota</h3>
       <div id="member-list"></div>
     </div>
-    <button class="btn-secondary danger-btn" onclick="leaveGroup()" style="margin-top:4px">Keluar dari grup</button>
+    <button class="btn-secondary danger-btn" onclick="deleteAccount()" style="margin-top:4px">🗑️ Hapus akun & data</button>
   </div>
 
   <!-- SETTINGS -->
@@ -314,6 +314,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     <div class="section-label">Aplikasi</div>
     <div class="card">
       <button class="btn-secondary" onclick="exportData()">📤 Export data (.json)</button>
+      <button class="btn-secondary" onclick="logout()" style="margin-top:8px">🔓 Keluar</button>
     </div>
   </div>
 </div>
@@ -838,13 +839,23 @@ function shareCode(){
   window.open(url,'_blank');
 }
 
-function leaveGroup(){
-  if(!confirm('Yakin mau keluar dari grup? Data kamu akan dihapus.'))return;
-  if (fbDb && S.groupCode && S.myId) {
-    fbDb.ref('groups/' + S.groupCode + '/members/' + S.myId).remove().catch(e => console.error('Firebase:', e));
-    fbDb.ref('groups/' + S.groupCode + '/amalan/' + S.myId).remove().catch(e => console.error('Firebase:', e));
-    fbDb.ref('groups/' + S.groupCode + '/colorIdx/' + S.myId).remove().catch(e => console.error('Firebase:', e));
-    fbDb.ref('groups/' + S.groupCode + '/haidDays/' + S.myId).remove().catch(e => console.error('Firebase:', e));
+function logout(){
+  if(!confirm('Keluar dari akun? Data tetap tersimpan di HP.'))return;
+  document.getElementById('screen-main').classList.remove('active');
+  document.getElementById('screen-onboard').classList.add('active');
+  document.getElementById('inp-name').value='';
+  document.getElementById('inp-code').value='';
+  S={myId:null,myName:'',groupCode:'',groupName:'',members:{},amalan:{},data:{},haidDays:{},colorIdx:{}};
+  S=JSON.parse(localStorage.getItem('amalan_state_v2'))||S;
+}
+
+function deleteAccount(){
+  if(!confirm('Yakin mau hapus akun & semua data? Tindakan ini permanen.'))return;
+  if(fbDb&&S.groupCode&&S.myId){
+    fbDb.ref('groups/'+S.groupCode+'/members/'+S.myId).remove().catch(e=>console.error('Firebase:',e));
+    fbDb.ref('groups/'+S.groupCode+'/amalan/'+S.myId).remove().catch(e=>console.error('Firebase:',e));
+    fbDb.ref('groups/'+S.groupCode+'/colorIdx/'+S.myId).remove().catch(e=>console.error('Firebase:',e));
+    fbDb.ref('groups/'+S.groupCode+'/haidDays/'+S.myId).remove().catch(e=>console.error('Firebase:',e));
   }
   localStorage.removeItem('amalan_state_v2');
   location.reload();
