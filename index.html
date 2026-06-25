@@ -1,894 +1,1654 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<meta name="theme-color" content="#1D9E75"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-<meta name="apple-mobile-web-app-title" content="My Amal"/>
-<title>My Amal</title>
-<link rel="manifest" href="manifest.json"/>
-<style>
-:root{
-  --green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;
-  --red:#E24B4A;--red-light:#FCEBEB;
-  --pink:#D4537E;--pink-light:#FBEAF0;
-  --gray:#888780;--gray-light:#F1EFE8;
-  --border:#e5e5e5;--bg:#fff;--bg2:#f7f7f5;--bg3:#f0f0ee;
-  --text:#1a1a1a;--text2:#666;--text3:#aaa;
-  --radius:10px;--radius-lg:14px;
-}
-@media(prefers-color-scheme:dark){
-  :root{
-    --border:#2a2a2a;--bg:#111;--bg2:#1a1a1a;--bg3:#222;
-    --text:#f0f0ee;--text2:#999;--text3:#555;
-    --green-light:#04342C;--red-light:#501313;--pink-light:#4B1528;--gray-light:#2C2C2A;
-  }
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;overscroll-behavior:none}
-.screen{display:none;height:100dvh;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.screen.active{display:flex;flex-direction:column}
-/* ONBOARDING */
-.onboard{flex:1;display:flex;flex-direction:column;justify-content:center;padding:32px 24px;gap:0}
-.logo-wrap{text-align:center;margin-bottom:36px}
-.logo-icon{width:72px;height:72px;background:var(--green-light);border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:32px}
-.logo-wrap h1{font-size:24px;font-weight:700;letter-spacing:-0.5px}
-.logo-wrap p{font-size:14px;color:var(--text2);margin-top:6px}
-.form-group{margin-bottom:14px}
-.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em}
-.form-group input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;font-size:15px;color:var(--text);outline:none}
-.form-group input:focus{border-color:var(--green)}
-.btn-primary{width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:14px;font-size:15px;font-weight:600;cursor:pointer}
-.btn-primary:active{background:var(--green-dark)}
-.btn-secondary{width:100%;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font-size:15px;font-weight:500;cursor:pointer;margin-top:10px}
-.btn-secondary:active{background:var(--bg3)}
-.divider{display:flex;align-items:center;gap:10px;color:var(--text3);font-size:12px;margin:18px 0}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-/* TOPBAR */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:10}
-.topbar-left{display:flex;align-items:center;gap:8px}
-.topbar h2{font-size:17px;font-weight:700}
-.topbar-actions{display:flex;gap:4px}
-.icon-btn{background:none;border:none;cursor:pointer;color:var(--text2);padding:6px;border-radius:8px;font-size:20px;display:flex;align-items:center;justify-content:center;min-width:36px;min-height:36px}
-.icon-btn:active{background:var(--bg2)}
-/* TAB BAR */
-.tab-bar{display:flex;background:var(--bg);border-bottom:1px solid var(--border);padding:0 4px;overflow-x:auto;scrollbar-width:none}
-.tab-bar::-webkit-scrollbar{display:none}
-.tab{flex:1;min-width:60px;text-align:center;padding:10px 4px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
-.tab.active{color:var(--green);border-bottom-color:var(--green)}
-/* CONTENT */
-.content{flex:1;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
-/* MEMBER TABS */
-.member-tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
-.member-tabs::-webkit-scrollbar{display:none}
-.mtab{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:var(--bg);white-space:nowrap;flex-shrink:0}
-.mtab.active{background:var(--green);color:#fff;border-color:var(--green)}
-/* HAID TOGGLE */
-.haid-bar{display:flex;align-items:center;justify-content:space-between;background:var(--pink-light);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px}
-.haid-bar-text h4{font-size:13px;font-weight:600;color:var(--pink)}
-.haid-bar-text p{font-size:11px;color:var(--text2);margin-top:2px}
-.toggle{position:relative;width:44px;height:26px;flex-shrink:0}
-.toggle input{opacity:0;width:0;height:0;position:absolute}
-.tslider{position:absolute;inset:0;background:var(--border);border-radius:26px;cursor:pointer;transition:.2s}
-.tslider::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
-.toggle input:checked+.tslider{background:var(--pink)}
-.toggle input:checked+.tslider::before{transform:translateX(18px)}
-/* MONTH NAV */
-.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.month-nav button{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;color:var(--text);font-size:14px}
-.month-nav button:active{background:var(--bg3)}
-.month-title{font-size:15px;font-weight:700}
-/* LEGEND */
-.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
-.ldot{width:14px;height:14px;border-radius:4px;flex-shrink:0}
-/* STATS */
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
-.scard{background:var(--bg2);border-radius:var(--radius);padding:12px 14px}
-.scard .sl{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500}
-.scard .sv{font-size:22px;font-weight:700}
-/* AMALAN LIST */
-.am-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)}
-.am-name{flex:1;font-size:13px;font-weight:500;min-width:80px}
-.am-scroll{overflow-x:auto;scrollbar-width:none}
-.am-scroll::-webkit-scrollbar{display:none}
-.am-cells{display:flex;gap:3px;padding:1px 0}
-.cell{width:28px;height:28px;border-radius:5px;border:none;cursor:pointer;font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
-.cell:disabled{opacity:0.35;cursor:default}
-.s-empty{background:var(--bg2);color:var(--text3);border:1px solid var(--border)}
-.s-done{background:var(--green);color:#fff}
-.s-miss{background:var(--red);color:#fff}
-.s-haid{background:var(--pink);color:#fff}
-.s-skip{background:var(--gray);color:#fff}
-.cell-hdr{background:var(--bg2);color:var(--text2);cursor:default;flex-direction:column;gap:1px;height:34px;line-height:1.1;padding:3px 0;pointer-events:none;font-weight:600}
-.am-row-header{border-bottom:2px solid var(--border);margin-bottom:4px;padding-bottom:4px}
-.am-row-header .am-name{font-size:11px;color:var(--text2);font-weight:600;min-width:80px}
-/* ADD ROW */
-.add-row{display:flex;gap:8px;margin-top:16px}
-.add-row input{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:14px;color:var(--text);outline:none}
-.add-row input:focus{border-color:var(--green)}
-.add-row button{background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:10px 14px;font-size:14px;cursor:pointer;white-space:nowrap;font-weight:600}
-.scroll-hint{font-size:11px;color:var(--text3);text-align:center;margin-top:8px}
-/* PROGRESS */
-.pb-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.pb-label{font-size:13px;min-width:110px;max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pb-track{flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden}
-.pb-fill{height:100%;background:var(--green);border-radius:4px;transition:width .4s}
-.pb-pct{font-size:12px;color:var(--text2);min-width:32px;text-align:right}
-/* CARD */
-.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px}
-.card h3{font-size:15px;font-weight:700;margin-bottom:12px}
-/* GROUP CODE */
-.group-code-box{background:var(--green-light);border-radius:var(--radius);padding:16px;text-align:center;margin-bottom:12px}
-.group-code-letters{font-size:32px;font-weight:800;letter-spacing:8px;color:var(--green)}
-.group-code-label{font-size:12px;color:var(--text2);margin-top:4px}
-/* MEMBER ITEM */
-.member-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
-.member-item:last-child{border-bottom:none}
-.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
-.mi-name{font-size:14px;font-weight:600}
-.mi-role{font-size:11px;color:var(--text2);margin-top:2px}
-.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-right:4px}
-.badge-admin{background:var(--green-light);color:var(--green-dark)}
-.badge-haid{background:var(--pink-light);color:var(--pink)}
-.badge-pria{background:var(--gray-light);color:var(--text2)}
-.badge-wanita{background:var(--pink-light);color:var(--pink)}
-.gender-opt{display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);flex:1;justify-content:center;font-size:14px;font-weight:500;background:var(--bg);transition:.15s}
-.gender-opt input{display:none}
-.gender-opt:has(input:checked){border-color:var(--green);background:var(--green-light);color:var(--green)}
-/* SETTINGS */
-.section-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin:20px 0 8px}
-.am-manage-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
-.am-manage-row:last-child{border-bottom:none}
-.color-swatch{width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:3px solid transparent}
-.color-swatch.selected{border-color:#333}
-@media(prefers-color-scheme:dark){.color-swatch.selected{border-color:#fff}}
-.danger-btn{color:var(--red);background:var(--red-light);border-color:var(--red-light)}
-/* TOAST */
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:24px;font-size:13px;font-weight:500;white-space:nowrap;z-index:999;opacity:0;transition:opacity .2s;pointer-events:none}
-#toast.show{opacity:1}
-@media(prefers-color-scheme:dark){#toast{background:#f0f0ee;color:#111}}
-/* INSTALL BANNER */
-#install-banner{display:none;background:var(--green-light);border-bottom:1px solid var(--border);padding:10px 16px;flex-direction:row;align-items:center;gap:10px}
-#install-banner.show{display:flex}
-#install-banner p{flex:1;font-size:13px;color:var(--green-dark)}
-#install-banner button{background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
-</style>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database-compat.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#1D9E75" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="My Amal" />
+  <title>My Amal</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    :root {
+      --green: #1D9E75;
+      --green-dark: #0F6E56;
+      --green-light: #E1F5EE;
+      --red: #E24B4A;
+      --red-light: #FCEBEB;
+      --pink: #D4537E;
+      --pink-light: #FBEAF0;
+      --gray: #888780;
+      --gray-light: #F1EFE8;
+      --border: #e5e5e5;
+      --bg: #fff;
+      --bg2: #f7f7f5;
+      --bg3: #f0f0ee;
+      --text: #1a1a1a;
+      --text2: #666;
+      --text3: #aaa;
+      --radius: 10px;
+      --radius-lg: 14px;
+    }
+
+    @media(prefers-color-scheme:dark) {
+      :root {
+        --border: #2a2a2a;
+        --bg: #111;
+        --bg2: #1a1a1a;
+        --bg3: #222;
+        --text: #f0f0ee;
+        --text2: #999;
+        --text3: #555;
+        --green-light: #04342C;
+        --red-light: #501313;
+        --pink-light: #4B1528;
+        --gray-light: #2C2C2A;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px;
+      overscroll-behavior: none
+    }
+
+    .screen {
+      display: none;
+      height: 100dvh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column
+    }
+
+    /* ONBOARDING */
+    .onboard {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 32px 24px;
+      gap: 0
+    }
+
+    .logo-wrap {
+      text-align: center;
+      margin-bottom: 36px
+    }
+
+    .logo-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--green-light);
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 32px
+    }
+
+    .logo-wrap h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px
+    }
+
+    .logo-wrap p {
+      font-size: 14px;
+      color: var(--text2);
+      margin-top: 6px
+    }
+
+    .form-group {
+      margin-bottom: 14px
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em
+    }
+
+    .form-group input {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      font-size: 15px;
+      color: var(--text);
+      outline: none
+    }
+
+    .form-group input:focus {
+      border-color: var(--green)
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer
+    }
+
+    .btn-primary:active {
+      background: var(--green-dark)
+    }
+
+    .btn-secondary {
+      width: 100%;
+      background: var(--bg2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 10px
+    }
+
+    .btn-secondary:active {
+      background: var(--bg3)
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text3);
+      font-size: 12px;
+      margin: 18px 0
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border)
+    }
+
+    /* TOPBAR */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 10
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .topbar h2 {
+      font-size: 17px;
+      font-weight: 700
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 4px
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text2);
+      padding: 6px;
+      border-radius: 8px;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      min-height: 36px
+    }
+
+    .icon-btn:active {
+      background: var(--bg2)
+    }
+
+    /* TAB BAR */
+    .tab-bar {
+      display: flex;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 4px;
+      overflow-x: auto;
+      scrollbar-width: none
+    }
+
+    .tab-bar::-webkit-scrollbar {
+      display: none
+    }
+
+    .tab {
+      flex: 1;
+      min-width: 60px;
+      text-align: center;
+      padding: 10px 4px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      white-space: nowrap
+    }
+
+    .tab.active {
+      color: var(--green);
+      border-bottom-color: var(--green)
+    }
+
+    /* CONTENT */
+    .content {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch
+    }
+
+    /* MEMBER TABS */
+    .member-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px
+    }
+
+    .member-tabs::-webkit-scrollbar {
+      display: none
+    }
+
+    .mtab {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      background: var(--bg);
+      white-space: nowrap;
+      flex-shrink: 0
+    }
+
+    .mtab.active {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green)
+    }
+
+    /* HAID TOGGLE */
+    .haid-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--pink-light);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 14px
+    }
+
+    .haid-bar-text h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--pink)
+    }
+
+    .haid-bar-text p {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 2px
+    }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 26px;
+      flex-shrink: 0
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute
+    }
+
+    .tslider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 26px;
+      cursor: pointer;
+      transition: .2s
+    }
+
+    .tslider::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 3px;
+      top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: .2s
+    }
+
+    .toggle input:checked+.tslider {
+      background: var(--pink)
+    }
+
+    .toggle input:checked+.tslider::before {
+      transform: translateX(18px)
+    }
+
+    /* MONTH NAV */
+    .month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px
+    }
+
+    .month-nav button {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 14px
+    }
+
+    .month-nav button:active {
+      background: var(--bg3)
+    }
+
+    .month-title {
+      font-size: 15px;
+      font-weight: 700
+    }
+
+    /* LEGEND */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px
+    }
+
+    .leg {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text2)
+    }
+
+    .ldot {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      flex-shrink: 0
+    }
+
+    /* STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px
+    }
+
+    .scard {
+      background: var(--bg2);
+      border-radius: var(--radius);
+      padding: 12px 14px
+    }
+
+    .scard .sl {
+      font-size: 11px;
+      color: var(--text2);
+      margin-bottom: 4px;
+      font-weight: 500
+    }
+
+    .scard .sv {
+      font-size: 22px;
+      font-weight: 700
+    }
+
+    /* AMALAN LIST */
+    .am-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .am-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      min-width: 80px
+    }
+
+    .am-scroll {
+      overflow-x: auto;
+      scrollbar-width: none
+    }
+
+    .am-scroll::-webkit-scrollbar {
+      display: none
+    }
+
+    .am-cells {
+      display: flex;
+      gap: 3px;
+      padding: 1px 0
+    }
+
+    .cell {
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
+    }
+
+    .cell:disabled {
+      opacity: 0.35;
+      cursor: default
+    }
+
+    .s-empty {
+      background: var(--bg2);
+      color: var(--text3);
+      border: 1px solid var(--border)
+    }
+
+    .s-done {
+      background: var(--green);
+      color: #fff
+    }
+
+    .s-miss {
+      background: var(--red);
+      color: #fff
+    }
+
+    .s-haid {
+      background: var(--pink);
+      color: #fff
+    }
+
+    .s-skip {
+      background: var(--gray);
+      color: #fff
+    }
+
+    .cell-hdr {
+      background: var(--bg2);
+      color: var(--text2);
+      cursor: default;
+      flex-direction: column;
+      gap: 1px;
+      height: 34px;
+      line-height: 1.1;
+      padding: 3px 0;
+      pointer-events: none;
+      font-weight: 600
+    }
+
+    .am-row-header {
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 4px;
+      padding-bottom: 4px
+    }
+
+    .am-row-header .am-name {
+      font-size: 11px;
+      color: var(--text2);
+      font-weight: 600;
+      min-width: 80px
+    }
+
+    /* ADD ROW */
+    .add-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px
+    }
+
+    .add-row input {
+      flex: 1;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 14px;
+      color: var(--text);
+      outline: none
+    }
+
+    .add-row input:focus {
+      border-color: var(--green)
+    }
+
+    .add-row button {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-weight: 600
+    }
+
+    .scroll-hint {
+      font-size: 11px;
+      color: var(--text3);
+      text-align: center;
+      margin-top: 8px
+    }
+
+    /* PROGRESS */
+    .pb-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px
+    }
+
+    .pb-label {
+      font-size: 13px;
+      min-width: 110px;
+      max-width: 110px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .pb-track {
+      flex: 1;
+      height: 8px;
+      background: var(--bg2);
+      border-radius: 4px;
+      overflow: hidden
+    }
+
+    .pb-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 4px;
+      transition: width .4s
+    }
+
+    .pb-pct {
+      font-size: 12px;
+      color: var(--text2);
+      min-width: 32px;
+      text-align: right
+    }
+
+    /* CARD */
+    .card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 12px
+    }
+
+    .card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px
+    }
+
+    /* GROUP CODE */
+    .group-code-box {
+      background: var(--green-light);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 12px
+    }
+
+    .group-code-letters {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: 8px;
+      color: var(--green)
+    }
+
+    .group-code-label {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 4px
+    }
+
+    /* MEMBER ITEM */
+    .member-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .member-item:last-child {
+      border-bottom: none
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0
+    }
+
+    .mi-name {
+      font-size: 14px;
+      font-weight: 600
+    }
+
+    .mi-role {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 2px
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-right: 4px
+    }
+
+    .badge-admin {
+      background: var(--green-light);
+      color: var(--green-dark)
+    }
+
+    .badge-haid {
+      background: var(--pink-light);
+      color: var(--pink)
+    }
+
+    .badge-pria {
+      background: var(--gray-light);
+      color: var(--text2)
+    }
+
+    .badge-wanita {
+      background: var(--pink-light);
+      color: var(--pink)
+    }
+
+    .gender-opt {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex: 1;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 500;
+      background: var(--bg);
+      transition: .15s
+    }
+
+    .gender-opt input {
+      display: none
+    }
+
+    .gender-opt:has(input:checked) {
+      border-color: var(--green);
+      background: var(--green-light);
+      color: var(--green)
+    }
+
+    /* SETTINGS */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 20px 0 8px
+    }
+
+    .am-manage-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .am-manage-row:last-child {
+      border-bottom: none
+    }
+
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      border: 3px solid transparent
+    }
+
+    .color-swatch.selected {
+      border-color: #333
+    }
+
+    @media(prefers-color-scheme:dark) {
+      .color-swatch.selected {
+        border-color: #fff
+      }
+    }
+
+    .danger-btn {
+      color: var(--red);
+      background: var(--red-light);
+      border-color: var(--red-light)
+    }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity .2s;
+      pointer-events: none
+    }
+
+    #toast.show {
+      opacity: 1
+    }
+
+    @media(prefers-color-scheme:dark) {
+      #toast {
+        background: #f0f0ee;
+        color: #111
+      }
+    }
+
+    /* INSTALL BANNER */
+    #install-banner {
+      display: none;
+      background: var(--green-light);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px
+    }
+
+    #install-banner.show {
+      display: flex
+    }
+
+    #install-banner p {
+      flex: 1;
+      font-size: 13px;
+      color: var(--green-dark)
+    }
+
+    #install-banner button {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database-compat.js"></script>
 </head>
+
 <body>
 
-<div id="toast"></div>
-<div id="install-banner">
-  <p>📲 Install aplikasi ini di HP kamu!</p>
-  <button onclick="installPWA()">Install</button>
-  <button onclick="document.getElementById('install-banner').classList.remove('show')" style="background:none;border:none;color:var(--text2);cursor:pointer;padding:7px;font-size:18px">✕</button>
-</div>
+  <div id="toast"></div>
+  <div id="install-banner">
+    <p>📲 Install aplikasi ini di HP kamu!</p>
+    <button onclick="installPWA()">Install</button>
+    <button onclick="document.getElementById('install-banner').classList.remove('show')"
+      style="background:none;border:none;color:var(--text2);cursor:pointer;padding:7px;font-size:18px">✕</button>
+  </div>
 
-<!-- ONBOARDING -->
-<div id="screen-onboard" class="screen active">
-  <div class="onboard">
-    <div class="logo-wrap">
-      <div class="logo-icon">🌙</div>
-      <h1>My Amal</h1>
-      <p>Track amalan harian bersama orang tersayang</p>
-    </div>
-    <div class="form-group">
-      <label>Nama kamu</label>
-      <input type="text" id="inp-name" placeholder="Contoh: Bunda, Ayah, Aisyah..." maxlength="20" autocomplete="off"/>
-    </div>
-    <div class="form-group">
-      <label>Jenis kelamin</label>
-      <div style="display:flex;gap:8px">
-        <label class="gender-opt"><input type="radio" name="gender-onboard" value="pria" checked/><span>👨 Pria</span></label>
-        <label class="gender-opt"><input type="radio" name="gender-onboard" value="wanita"/><span>👩 Wanita</span></label>
+  <!-- ONBOARDING -->
+  <div id="screen-onboard" class="screen active">
+    <div class="onboard">
+      <div class="logo-wrap">
+        <div class="logo-icon">🌙</div>
+        <h1>My Amal</h1>
+        <p>Track amalan harian bersama orang tersayang</p>
       </div>
-    </div>
-    <button class="btn-primary" onclick="createGroup()">＋ Buat grup baru</button>
-    <div class="divider">atau gabung grup yang ada</div>
-    <div class="form-group">
-      <label>Kode undangan (4 huruf)</label>
-      <input type="text" id="inp-code" placeholder="Masukkan kode dari pasangan..." maxlength="4" autocomplete="off" style="text-transform:uppercase;letter-spacing:6px;font-size:20px;text-align:center;font-weight:700"/>
-    </div>
-    <button class="btn-secondary" onclick="joinGroup()">👥 Gabung grup</button>
-    <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:20px">Data tersimpan lokal di HP kamu</p>
-  </div>
-</div>
-
-<!-- MAIN APP -->
-<div id="screen-main" class="screen">
-  <div class="topbar">
-    <div class="topbar-left">
-      <span style="font-size:22px">🌙</span>
-      <h2 id="group-title">My Amal</h2>
-    </div>
-    <div class="topbar-actions">
-      <button class="icon-btn" onclick="showTab('group')" title="Grup">👥</button>
-      <button class="icon-btn" onclick="showTab('settings')" title="Pengaturan">⚙️</button>
-    </div>
-  </div>
-
-  <div class="tab-bar">
-    <div class="tab active" id="t-tracker" onclick="showTab('tracker')">Amalan</div>
-    <div class="tab" id="t-progress" onclick="showTab('progress')">Progress</div>
-    <div class="tab" id="t-group" onclick="showTab('group')">Grup</div>
-    <div class="tab" id="t-settings" onclick="showTab('settings')">Pengaturan</div>
-  </div>
-
-  <!-- TRACKER -->
-  <div class="content" id="p-tracker">
-    <div id="haid-bar" class="haid-bar" style="display:none">
-      <div class="haid-bar-text">
-        <h4>Status haid / uzur</h4>
-        <p id="haid-bar-sub">Aktifkan jika sedang haid</p>
+      <div class="form-group">
+        <label>Nama kamu</label>
+        <input type="text" id="inp-name" placeholder="Contoh: Bunda, Ayah, Aisyah..." maxlength="20"
+          autocomplete="off" />
       </div>
-      <label class="toggle">
-        <input type="checkbox" id="haid-toggle" onchange="toggleHaid()">
-        <span class="tslider"></span>
-      </label>
-    </div>
-    <div class="month-nav">
-      <button onclick="changeMonth(-1)">‹</button>
-      <span class="month-title" id="month-label"></span>
-      <button onclick="changeMonth(1)">›</button>
-    </div>
-    <div class="member-tabs" id="mtabs"></div>
-    <div class="legend">
-      <div class="leg"><div class="ldot" style="background:var(--green)"></div>Terlaksana</div>
-      <div class="leg"><div class="ldot" style="background:var(--red)"></div>Tidak</div>
-      <div class="leg"><div class="ldot" style="background:var(--pink)"></div>Haid</div>
-      <div class="leg"><div class="ldot" style="background:var(--gray)"></div>Tdk dijad.</div>
-    </div>
-    <div class="stats-grid" id="stats-grid"></div>
-    <div id="amalan-list"></div>
-    <p class="scroll-hint">← geser untuk lihat semua hari →</p>
-    <div class="add-row" id="add-row" style="display:none">
-      <input type="text" id="new-amalan" placeholder="Tambah amalan baru..." maxlength="35"/>
-      <button onclick="addAmalan()">＋</button>
-    </div>
-  </div>
-
-  <!-- PROGRESS -->
-  <div class="content" id="p-progress" style="display:none">
-    <div class="member-tabs" id="mtabs-prog"></div>
-    <div class="month-nav">
-      <button onclick="changeMonth(-1)">‹</button>
-      <span class="month-title" id="month-label-prog"></span>
-      <button onclick="changeMonth(1)">›</button>
-    </div>
-    <div id="prog-bars"></div>
-    <div id="streak-sec"></div>
-  </div>
-
-  <!-- GROUP -->
-  <div class="content" id="p-group" style="display:none">
-    <div class="card">
-      <h3>Kode undangan</h3>
-      <div class="group-code-box">
-        <div class="group-code-letters" id="code-display">----</div>
-        <div class="group-code-label">Bagikan kode ini ke pasangan / keluarga</div>
-      </div>
-      <button class="btn-primary" onclick="copyCode()" style="margin-bottom:8px">📋 Salin kode</button>
-      <button class="btn-secondary" onclick="shareCode()">🔗 Bagikan via WhatsApp</button>
-    </div>
-    <div class="card">
-      <h3>Anggota</h3>
-      <div id="member-list"></div>
-    </div>
-    <button class="btn-secondary danger-btn" onclick="deleteAccount()" style="margin-top:4px">🗑️ Hapus akun & data</button>
-  </div>
-
-  <!-- SETTINGS -->
-  <div class="content" id="p-settings" style="display:none">
-    <div class="section-label">Profil saya</div>
-    <div class="card">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-        <div class="avatar" id="my-av"></div>
-        <div>
-          <div style="font-size:16px;font-weight:700" id="my-name-disp"></div>
-          <div style="font-size:12px;color:var(--text2)">Anggota aktif</div>
+      <div class="form-group">
+        <label>Jenis kelamin</label>
+        <div style="display:flex;gap:8px">
+          <label class="gender-opt"><input type="radio" name="gender-onboard" value="pria" checked /><span>👨
+              Pria</span></label>
+          <label class="gender-opt"><input type="radio" name="gender-onboard" value="wanita" /><span>👩
+              Wanita</span></label>
         </div>
       </div>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="edit-name" placeholder="Ganti nama..." maxlength="20"
-          style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:14px;color:var(--text);outline:none"/>
-        <button onclick="saveName()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer">Simpan</button>
+      <button class="btn-primary" onclick="createGroup()">＋ Buat grup baru</button>
+      <div class="divider">atau gabung grup yang ada</div>
+      <div class="form-group">
+        <label>Kode undangan (4 huruf)</label>
+        <input type="text" id="inp-code" placeholder="Masukkan kode dari pasangan..." maxlength="4" autocomplete="off"
+          style="text-transform:uppercase;letter-spacing:6px;font-size:20px;text-align:center;font-weight:700" />
       </div>
-    </div>
-    <div class="section-label">Jenis kelamin</div>
-    <div class="card">
-      <div style="display:flex;gap:8px">
-        <label class="gender-opt" id="gender-pria-label"><input type="radio" name="gender-settings" value="pria" onchange="saveGender()"/><span>👨 Pria</span></label>
-        <label class="gender-opt" id="gender-wanita-label"><input type="radio" name="gender-settings" value="wanita" onchange="saveGender()"/><span>👩 Wanita</span></label>
-      </div>
-    </div>
-    <div class="section-label">Warna avatar</div>
-    <div class="card">
-      <div style="display:flex;gap:10px;flex-wrap:wrap" id="color-picker"></div>
-    </div>
-    <div class="section-label">Daftar amalan saya</div>
-    <div class="card" id="am-manage"></div>
-    <div class="section-label">Aplikasi</div>
-    <div class="card">
-      <button class="btn-secondary" onclick="exportData()">📤 Export data (.json)</button>
-      <button class="btn-secondary" onclick="logout()" style="margin-top:8px">🔓 Keluar</button>
+      <button class="btn-secondary" onclick="joinGroup()">👥 Gabung grup</button>
+      <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:20px">Data tersimpan lokal di HP kamu</p>
     </div>
   </div>
-</div>
 
-<script>
-const MONTHS=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-const STATUSES=['empty','done','miss','haid','skip'];
-const LABELS={empty:'',done:'✓',miss:'✗',haid:'H',skip:'–'};
-const SCLS={empty:'s-empty',done:'s-done',miss:'s-miss',haid:'s-haid',skip:'s-skip'};
-const AVATARS=[
-  {bg:'#E1F5EE',col:'#085041'},{bg:'#E6F1FB',col:'#0C447C'},{bg:'#FBEAF0',col:'#72243E'},
-  {bg:'#FAEEDA',col:'#633806'},{bg:'#EEEDFE',col:'#3C3489'},{bg:'#FAECE7',col:'#712B13'},
-];
-const DEF_AMALAN=['Sholat Subuh','Sholat Zuhur','Sholat Ashar','Sholat Maghrib','Sholat Isya',
-  'Tilawah Al-Qur\'an','Dzikir pagi','Dzikir petang','Sedekah','Tahajud','Sholat dhuha','Puasa sunnah'];
+  <!-- MAIN APP -->
+  <div id="screen-main" class="screen">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span style="font-size:22px">🌙</span>
+        <h2 id="group-title">My Amal</h2>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="showTab('group')" title="Grup">👥</button>
+        <button class="icon-btn" onclick="showTab('settings')" title="Pengaturan">⚙️</button>
+      </div>
+    </div>
 
-let S={myId:null,myName:'',groupCode:'',groupName:'',members:{},amalan:{},data:{},haidDays:{},colorIdx:{}};
-let curY=new Date().getFullYear(),curM=new Date().getMonth(),viewUid=null,curTab='tracker';
-let deferredPrompt=null;
+    <div class="tab-bar">
+      <div class="tab active" id="t-tracker" onclick="showTab('tracker')">Amalan</div>
+      <div class="tab" id="t-progress" onclick="showTab('progress')">Progress</div>
+      <div class="tab" id="t-group" onclick="showTab('group')">Grup</div>
+      <div class="tab" id="t-settings" onclick="showTab('settings')">Pengaturan</div>
+    </div>
 
-// Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyBGU7uf2tkBPoPJcw0Ri4w7jFE7x3OODd8",
-  authDomain: "myamal-53576.firebaseapp.com",
-  databaseURL: "https://myamal-53576-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "myamal-53576",
-  storageBucket: "myamal-53576.firebasestorage.app",
-  messagingSenderId: "364105173271",
-  appId: "1:364105173271:web:f5bc8b65912617d98a4f52"
-};
-let fbApp = null, fbDb = null, fbListener = null;
+    <!-- TRACKER -->
+    <div class="content" id="p-tracker">
+      <div id="haid-bar" class="haid-bar" style="display:none">
+        <div class="haid-bar-text">
+          <h4>Status haid / uzur</h4>
+          <p id="haid-bar-sub">Aktifkan jika sedang haid</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="haid-toggle" onchange="toggleHaid()">
+          <span class="tslider"></span>
+        </label>
+      </div>
+      <div class="month-nav">
+        <button onclick="changeMonth(-1)">‹</button>
+        <span class="month-title" id="month-label"></span>
+        <button onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="member-tabs" id="mtabs"></div>
+      <div class="legend">
+        <div class="leg">
+          <div class="ldot" style="background:var(--green)"></div>Terlaksana
+        </div>
+        <div class="leg">
+          <div class="ldot" style="background:var(--red)"></div>Tidak
+        </div>
+        <div class="leg" id="leg-haid">
+          <div class="ldot" style="background:var(--pink)"></div>Haid
+        </div>
+        <div class="leg">
+          <div class="ldot" style="background:var(--gray)"></div>Tdk dijad.
+        </div>
+      </div>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div id="amalan-list"></div>
+      <p class="scroll-hint">← geser untuk lihat semua hari →</p>
+      <div class="add-row" id="add-row" style="display:none">
+        <input type="text" id="new-amalan" placeholder="Tambah amalan baru..." maxlength="35" />
+        <button onclick="addAmalan()">＋</button>
+      </div>
+    </div>
 
-function initFirebase() {
-  if (fbApp) return;
-  try { fbApp = firebase.initializeApp(firebaseConfig); fbDb = firebase.database(); } catch (e) { console.error('Firebase:', e); }
-}
+    <!-- PROGRESS -->
+    <div class="content" id="p-progress" style="display:none">
+      <div class="member-tabs" id="mtabs-prog"></div>
+      <div class="month-nav">
+        <button onclick="changeMonth(-1)">‹</button>
+        <span class="month-title" id="month-label-prog"></span>
+        <button onclick="changeMonth(1)">›</button>
+      </div>
+      <div id="prog-bars"></div>
+      <div id="streak-sec"></div>
+    </div>
 
-function fbWrite(path, value) {
-  if (!fbDb || !S.groupCode) return;
-  fbDb.ref('groups/' + S.groupCode + '/' + path).set(value).catch(e => console.error('Firebase:', e));
-}
+    <!-- GROUP -->
+    <div class="content" id="p-group" style="display:none">
+      <div class="card">
+        <h3>Kode undangan</h3>
+        <div class="group-code-box">
+          <div class="group-code-letters" id="code-display">----</div>
+          <div class="group-code-label">Bagikan kode ini ke pasangan / keluarga</div>
+        </div>
+        <button class="btn-primary" onclick="copyCode()" style="margin-bottom:8px">📋 Salin kode</button>
+        <button class="btn-secondary" onclick="shareCode()">🔗 Bagikan via WhatsApp</button>
+      </div>
+      <div class="card">
+        <h3>Anggota</h3>
+        <div id="member-list"></div>
+      </div>
+      <button class="btn-secondary danger-btn" onclick="deleteAccount()" style="margin-top:4px">🗑️ Hapus akun &
+        data</button>
+    </div>
 
-function listenGroup(code) {
-  if (!fbDb) return;
-  if (fbListener) fbListener.off();
-  fbListener = fbDb.ref('groups/' + code);
-  fbListener.on('value', onFbUpdate);
-}
+    <!-- SETTINGS -->
+    <div class="content" id="p-settings" style="display:none">
+      <div class="section-label">Profil saya</div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div class="avatar" id="my-av"></div>
+          <div>
+            <div style="font-size:16px;font-weight:700" id="my-name-disp"></div>
+            <div style="font-size:12px;color:var(--text2)">Anggota aktif</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="edit-name" placeholder="Ganti nama..." maxlength="20"
+            style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:14px;color:var(--text);outline:none" />
+          <button onclick="saveName()"
+            style="background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer">Simpan</button>
+        </div>
+      </div>
+      <div class="section-label">Jenis kelamin</div>
+      <div class="card">
+        <div style="display:flex;gap:8px">
+          <label class="gender-opt" id="gender-pria-label"><input type="radio" name="gender-settings" value="pria"
+              onchange="saveGender()" /><span>👨 Pria</span></label>
+          <label class="gender-opt" id="gender-wanita-label"><input type="radio" name="gender-settings" value="wanita"
+              onchange="saveGender()" /><span>👩 Wanita</span></label>
+        </div>
+      </div>
+      <div class="section-label">Warna avatar</div>
+      <div class="card">
+        <div style="display:flex;gap:10px;flex-wrap:wrap" id="color-picker"></div>
+      </div>
+      <div class="section-label">Daftar amalan saya</div>
+      <div class="card" id="am-manage"></div>
+      <div class="section-label">Aplikasi</div>
+      <div class="card">
+        <!-- <button class="btn-secondary" onclick="exportData()">📤 Export data (.json)</button> -->
+        <button class="btn-secondary" onclick="logout()" style="margin-top:8px">🔓 Keluar</button>
+      </div>
+    </div>
+  </div>
 
-function onFbUpdate(snap) {
-  const val = snap.val();
-  if (!val) return;
-  let changed = false;
-  if (val.groupName && val.groupName !== S.groupName) { S.groupName = val.groupName; changed = true; }
-  if (val.members) {
-    Object.keys(val.members).forEach(uid => {
-      const m = val.members[uid];
-      if (!S.members[uid] || JSON.stringify(S.members[uid]) !== JSON.stringify(m)) { S.members[uid] = m; changed = true; }
+  <script>
+    const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const STATUSES = ['empty', 'done', 'miss', 'haid', 'skip'];
+    const LABELS = { empty: '', done: '✓', miss: '✗', haid: 'H', skip: '–' };
+    const SCLS = { empty: 's-empty', done: 's-done', miss: 's-miss', haid: 's-haid', skip: 's-skip' };
+    function getStatuses(uid) {
+      const m = S.members[uid];
+      if (m && m.gender === 'pria') return ['empty', 'done', 'miss', 'skip'];
+      return STATUSES;
+    }
+    const AVATARS = [
+      { bg: '#E1F5EE', col: '#085041' }, { bg: '#E6F1FB', col: '#0C447C' }, { bg: '#FBEAF0', col: '#72243E' },
+      { bg: '#FAEEDA', col: '#633806' }, { bg: '#EEEDFE', col: '#3C3489' }, { bg: '#FAECE7', col: '#712B13' },
+    ];
+    const DEF_AMALAN = ['Sholat Subuh', 'Sholat Zuhur', 'Sholat Ashar', 'Sholat Maghrib', 'Sholat Isya',
+      'Tilawah Al-Qur\'an', 'Dzikir pagi', 'Dzikir petang', 'Sedekah', 'Tahajud', 'Sholat dhuha', 'Puasa sunnah'];
+
+    let S = { myId: null, myName: '', groupCode: '', groupName: '', members: {}, amalan: {}, data: {}, haidDays: {}, colorIdx: {} };
+    let curY = new Date().getFullYear(), curM = new Date().getMonth(), viewUid = null, curTab = 'tracker';
+    let deferredPrompt = null;
+
+    // Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBGU7uf2tkBPoPJcw0Ri4w7jFE7x3OODd8",
+      authDomain: "myamal-53576.firebaseapp.com",
+      databaseURL: "https://myamal-53576-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "myamal-53576",
+      storageBucket: "myamal-53576.firebasestorage.app",
+      messagingSenderId: "364105173271",
+      appId: "1:364105173271:web:f5bc8b65912617d98a4f52"
+    };
+    let fbApp = null, fbDb = null, fbListener = null;
+
+    function initFirebase() {
+      if (fbApp) return;
+      try { fbApp = firebase.initializeApp(firebaseConfig); fbDb = firebase.database(); } catch (e) { console.error('Firebase:', e); }
+    }
+
+    function fbWrite(path, value) {
+      if (!fbDb || !S.groupCode) return;
+      fbDb.ref('groups/' + S.groupCode + '/' + path).set(value).catch(e => console.error('Firebase:', e));
+    }
+
+    function listenGroup(code) {
+      if (!fbDb) return;
+      if (fbListener) fbListener.off();
+      fbListener = fbDb.ref('groups/' + code);
+      fbListener.on('value', onFbUpdate);
+    }
+
+    function onFbUpdate(snap) {
+      const val = snap.val();
+      if (!val) return;
+      let changed = false;
+      if (val.groupName && val.groupName !== S.groupName) { S.groupName = val.groupName; changed = true; }
+      if (val.members) {
+        Object.keys(val.members).forEach(uid => {
+          const m = val.members[uid];
+          if (!S.members[uid] || JSON.stringify(S.members[uid]) !== JSON.stringify(m)) { S.members[uid] = m; changed = true; }
+        });
+      }
+      if (val.amalan) {
+        Object.keys(val.amalan).forEach(uid => {
+          const a = val.amalan[uid];
+          if (!S.amalan[uid] || JSON.stringify(S.amalan[uid]) !== JSON.stringify(a)) { S.amalan[uid] = a; changed = true; }
+        });
+      }
+      if (val.colorIdx) {
+        Object.keys(val.colorIdx).forEach(uid => {
+          if (S.colorIdx[uid] !== val.colorIdx[uid]) { S.colorIdx[uid] = val.colorIdx[uid]; changed = true; }
+        });
+      }
+      if (val.data) {
+        let hadEncoded = false;
+        Object.keys(val.data).forEach(k => {
+          const dk = k.includes('%') ? decodeURIComponent(k) : k;
+          if (S.data[dk] !== val.data[k]) { S.data[dk] = val.data[k]; changed = true; }
+          if (dk !== k) { hadEncoded = true; delete val.data[k]; }
+        });
+        if (hadEncoded && fbDb) fbDb.ref('groups/' + S.groupCode + '/data').set(S.data).catch(() => { });
+      }
+      if (val.haidDays) {
+        Object.keys(val.haidDays).forEach(uid => {
+          if (!S.haidDays[uid]) S.haidDays[uid] = {};
+          Object.keys(val.haidDays[uid] || {}).forEach(dk => {
+            if (S.haidDays[uid][dk] !== val.haidDays[uid][dk]) { S.haidDays[uid][dk] = val.haidDays[uid][dk]; changed = true; }
+          });
+        });
+      }
+      if (changed) {
+        localStorage.setItem('amalan_state_v2', JSON.stringify(S));
+        renderAll();
+        if (curTab === 'progress') renderProgress();
+        if (curTab === 'group') renderGroup();
+        if (curTab === 'settings') renderSettings();
+      }
+    }
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault(); deferredPrompt = e;
+      document.getElementById('install-banner').classList.add('show');
     });
-  }
-  if (val.amalan) {
-    Object.keys(val.amalan).forEach(uid => {
-      const a = val.amalan[uid];
-      if (!S.amalan[uid] || JSON.stringify(S.amalan[uid]) !== JSON.stringify(a)) { S.amalan[uid] = a; changed = true; }
-    });
-  }
-  if (val.colorIdx) {
-    Object.keys(val.colorIdx).forEach(uid => {
-      if (S.colorIdx[uid] !== val.colorIdx[uid]) { S.colorIdx[uid] = val.colorIdx[uid]; changed = true; }
-    });
-  }
-  if (val.data) {
-    let hadEncoded = false;
-    Object.keys(val.data).forEach(k => {
-      const dk = k.includes('%') ? decodeURIComponent(k) : k;
-      if (S.data[dk] !== val.data[k]) { S.data[dk] = val.data[k]; changed = true; }
-      if (dk !== k) { hadEncoded = true; delete val.data[k]; }
-    });
-    if (hadEncoded && fbDb) fbDb.ref('groups/' + S.groupCode + '/data').set(S.data).catch(() => {});
-  }
-  if (val.haidDays) {
-    Object.keys(val.haidDays).forEach(uid => {
-      if (!S.haidDays[uid]) S.haidDays[uid] = {};
-      Object.keys(val.haidDays[uid] || {}).forEach(dk => {
-        if (S.haidDays[uid][dk] !== val.haidDays[uid][dk]) { S.haidDays[uid][dk] = val.haidDays[uid][dk]; changed = true; }
+
+    function installPWA() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        document.getElementById('install-banner').classList.remove('show');
       });
-    });
-  }
-  if (changed) {
-    localStorage.setItem('amalan_state_v2', JSON.stringify(S));
-    renderAll();
-    if (curTab === 'progress') renderProgress();
-    if (curTab === 'group') renderGroup();
-    if (curTab === 'settings') renderSettings();
-  }
-}
+    }
 
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();deferredPrompt=e;
-  document.getElementById('install-banner').classList.add('show');
-});
+    function save() {
+      try { localStorage.setItem('amalan_state_v2', JSON.stringify(S)); } catch (e) { }
+    }
 
-function installPWA(){
-  if(!deferredPrompt)return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(()=>{
-    deferredPrompt=null;
-    document.getElementById('install-banner').classList.remove('show');
-  });
-}
+    function load() {
+      try {
+        const raw = localStorage.getItem('amalan_state_v2');
+        if (raw) { S = JSON.parse(raw); return true; }
+      } catch (e) { }
+      return false;
+    }
 
-function save(){
-  try{localStorage.setItem('amalan_state_v2',JSON.stringify(S));}catch(e){}
-}
+    function migrateOldData() {
+      // Fix any encoded keys from older versions
+      let fixed = false;
+      Object.keys(S.data).forEach(k => {
+        const dk = decodeURIComponent(k);
+        if (dk !== k) { S.data[dk] = S.data[k]; delete S.data[k]; fixed = true; }
+      });
+      Object.keys(S.haidDays).forEach(uid => {
+        Object.keys(S.haidDays[uid] || {}).forEach(dk => {
+          const clean = decodeURIComponent(dk);
+          if (clean !== dk) { S.haidDays[uid][clean] = S.haidDays[uid][dk]; delete S.haidDays[uid][dk]; fixed = true; }
+        });
+      });
+      // Migrasi gender untuk member lama
+      Object.values(S.members).forEach(m => { if (!m.gender) { m.gender = 'wanita'; fixed = true; } });
+      if (fixed) save();
+    }
 
-function load(){
-  try{
-    const raw=localStorage.getItem('amalan_state_v2');
-    if(raw){S=JSON.parse(raw);return true;}
-  }catch(e){}
-  return false;
-}
+    function genCode() { return Math.random().toString(36).substr(2, 4).toUpperCase(); }
+    function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 4); }
+    function dim(y, m) { return new Date(y, m + 1, 0).getDate(); }
+    function dk(y, m, d, uid, am) { return uid + '|' + y + '|' + m + '|' + d + '|' + am; }
+    function initials(n) { return n ? n.trim().split(' ').map(w => w[0]).join('').substr(0, 2).toUpperCase() : '??'; }
+    function av(uid) { const i = (S.colorIdx[uid] || 0) % AVATARS.length; return AVATARS[i]; }
 
-function migrateOldData(){
-  // Fix any encoded keys from older versions
-  let fixed = false;
-  Object.keys(S.data).forEach(k => {
-    const dk = decodeURIComponent(k);
-    if (dk !== k) { S.data[dk] = S.data[k]; delete S.data[k]; fixed = true; }
-  });
-  Object.keys(S.haidDays).forEach(uid => {
-    Object.keys(S.haidDays[uid] || {}).forEach(dk => {
-      const clean = decodeURIComponent(dk);
-      if (clean !== dk) { S.haidDays[uid][clean] = S.haidDays[uid][dk]; delete S.haidDays[uid][dk]; fixed = true; }
-    });
-  });
-  // Migrasi gender untuk member lama
-  Object.values(S.members).forEach(m => { if(!m.gender){m.gender='wanita';fixed=true;} });
-  if (fixed) save();
-}
+    function createGroup() {
+      const n = document.getElementById('inp-name').value.trim();
+      const g = document.querySelector('input[name="gender-onboard"]:checked')?.value || 'wanita';
+      if (!n) { toast('Masukkan namamu dulu ya'); return; }
+      S.myId = genId(); S.myName = n; S.groupCode = genCode(); S.groupName = 'Keluarga ' + n;
+      S.members[S.myId] = { name: n, gender: g, joined: Date.now() };
+      S.amalan[S.myId] = [...DEF_AMALAN];
+      S.colorIdx[S.myId] = 0; S.haidDays[S.myId] = {};
+      viewUid = S.myId; save(); enterApp();
+      initFirebase();
+      fbDb.ref('groups/' + S.groupCode).set({
+        groupName: S.groupName, members: S.members, amalan: S.amalan,
+        colorIdx: S.colorIdx, data: S.data, haidDays: S.haidDays
+      }).catch(e => console.error('Firebase:', e));
+      listenGroup(S.groupCode);
+    }
 
-function genCode(){return Math.random().toString(36).substr(2,4).toUpperCase();}
-function genId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,4);}
-function dim(y,m){return new Date(y,m+1,0).getDate();}
-function dk(y,m,d,uid,am){return uid+'|'+y+'|'+m+'|'+d+'|'+am;}
-function initials(n){return n?n.trim().split(' ').map(w=>w[0]).join('').substr(0,2).toUpperCase():'??';}
-function av(uid){const i=(S.colorIdx[uid]||0)%AVATARS.length;return AVATARS[i];}
+    async function joinGroup() {
+      const n = document.getElementById('inp-name').value.trim();
+      const code = document.getElementById('inp-code').value.trim().toUpperCase();
+      const g = document.querySelector('input[name="gender-onboard"]:checked')?.value || 'wanita';
+      if (!n) { toast('Masukkan namamu dulu'); return; }
+      if (code.length !== 4) { toast('Kode harus 4 huruf'); return; }
+      S.groupCode = code; S.myName = n;
+      initFirebase();
+      let recovered = false;
+      try {
+        const snap = await fbDb.ref('groups/' + code).once('value');
+        const grp = snap.val();
+        if (grp && grp.members) {
+          Object.entries(grp.members).forEach(([uid, m]) => {
+            if (m.name === n && !recovered) {
+              recovered = true;
+              S.myId = uid; S.groupName = grp.groupName || ('Keluarga ' + n);
+              S.members = grp.members; S.amalan = grp.amalan || {};
+              S.data = grp.data || {}; S.haidDays = grp.haidDays || {};
+              S.colorIdx = grp.colorIdx || {};
+              if (!S.amalan[uid]) S.amalan[uid] = [...DEF_AMALAN];
+              if (!S.haidDays[uid]) S.haidDays[uid] = {};
+              if (S.colorIdx[uid] === undefined) S.colorIdx[uid] = 0;
+            }
+          });
+        }
+        if (!recovered) {
+          S.myId = genId(); S.groupName = grp?.groupName || 'Keluarga ' + n;
+          S.members = grp?.members || {}; S.amalan = grp?.amalan || {};
+          S.data = grp?.data || {}; S.haidDays = grp?.haidDays || {};
+          S.colorIdx = grp?.colorIdx || {};
+          S.members[S.myId] = { name: n, gender: g, joined: Date.now() };
+          S.amalan[S.myId] = [...DEF_AMALAN];
+          S.colorIdx[S.myId] = Object.keys(S.members).length % AVATARS.length;
+          S.haidDays[S.myId] = {};
+          fbWrite('members/' + S.myId, S.members[S.myId]);
+          fbWrite('amalan/' + S.myId, S.amalan[S.myId]);
+          fbWrite('colorIdx/' + S.myId, S.colorIdx[S.myId]);
+          fbWrite('haidDays/' + S.myId, S.haidDays[S.myId]);
+        }
+      } catch (e) {
+        // Fallback: Firebase error
+        S.myId = genId();
+        const existing = localStorage.getItem('amalan_group_' + code);
+        if (existing) { try { const g2 = JSON.parse(existing); Object.assign(S, g2); } catch (e) { } }
+        if (!S.groupName) S.groupName = 'Keluarga';
+        S.members[S.myId] = { name: n, gender: g, joined: Date.now() };
+        S.amalan[S.myId] = [...DEF_AMALAN];
+        S.colorIdx[S.myId] = Object.keys(S.members).length % AVATARS.length;
+        S.haidDays[S.myId] = {};
+      }
+      viewUid = S.myId; save();
+      localStorage.setItem('amalan_group_' + code, JSON.stringify(S));
+      enterApp();
+      listenGroup(code);
+      if (recovered) toast('Akun "' + n + '" dipulihkan!');
+    }
 
-function createGroup(){
-  const n=document.getElementById('inp-name').value.trim();
-  const g=document.querySelector('input[name="gender-onboard"]:checked')?.value||'wanita';
-  if(!n){toast('Masukkan namamu dulu ya');return;}
-  S.myId=genId();S.myName=n;S.groupCode=genCode();S.groupName='Keluarga '+n;
-  S.members[S.myId]={name:n,gender:g,joined:Date.now()};
-  S.amalan[S.myId]=[...DEF_AMALAN];
-  S.colorIdx[S.myId]=0;S.haidDays[S.myId]={};
-  viewUid=S.myId;save();enterApp();
-  initFirebase();
-  fbDb.ref('groups/' + S.groupCode).set({
-    groupName: S.groupName, members: S.members, amalan: S.amalan,
-    colorIdx: S.colorIdx, data: S.data, haidDays: S.haidDays
-  }).catch(e => console.error('Firebase:', e));
-  listenGroup(S.groupCode);
-}
+    function enterApp() {
+      document.getElementById('screen-onboard').classList.remove('active');
+      document.getElementById('screen-main').classList.add('active');
+      document.getElementById('code-display').textContent = S.groupCode;
+      document.getElementById('group-title').textContent = S.groupName || 'Amalan Keluarga';
+      renderAll();
+    }
 
-async function joinGroup(){
-  const n=document.getElementById('inp-name').value.trim();
-  const code=document.getElementById('inp-code').value.trim().toUpperCase();
-  const g=document.querySelector('input[name="gender-onboard"]:checked')?.value||'wanita';
-  if(!n){toast('Masukkan namamu dulu');return;}
-  if(code.length!==4){toast('Kode harus 4 huruf');return;}
-  S.groupCode=code;S.myName=n;
-  initFirebase();
-  let recovered=false;
-  try{
-    const snap=await fbDb.ref('groups/'+code).once('value');
-    const grp=snap.val();
-    if(grp&&grp.members){
-      Object.entries(grp.members).forEach(([uid,m])=>{
-        if(m.name===n&&!recovered){
-          recovered=true;
-          S.myId=uid;S.groupName=grp.groupName||('Keluarga '+n);
-          S.members=grp.members;S.amalan=grp.amalan||{};
-          S.data=grp.data||{};S.haidDays=grp.haidDays||{};
-          S.colorIdx=grp.colorIdx||{};
-          if(!S.amalan[uid])S.amalan[uid]=[...DEF_AMALAN];
-          if(!S.haidDays[uid])S.haidDays[uid]={};
-          if(S.colorIdx[uid]===undefined)S.colorIdx[uid]=0;
+    function showTab(tab) {
+      ['tracker', 'progress', 'group', 'settings'].forEach(t => {
+        document.getElementById('t-' + t).classList.remove('active');
+        document.getElementById('p-' + t).style.display = 'none';
+      });
+      document.getElementById('t-' + tab).classList.add('active');
+      document.getElementById('p-' + tab).style.display = '';
+      curTab = tab;
+      if (tab === 'progress') renderProgress();
+      if (tab === 'group') renderGroup();
+      if (tab === 'settings') renderSettings();
+    }
+
+    function changeMonth(d) {
+      curM += d;
+      if (curM > 11) { curM = 0; curY++; }
+      if (curM < 0) { curM = 11; curY--; }
+      renderAll();
+    }
+
+    function isHaidDay(uid, y, m, d) { return !!(S.haidDays[uid] || {})[y + '-' + m + '-' + d]; }
+
+    function toggleHaid() {
+      const now = new Date();
+      const k = now.getFullYear() + '-' + now.getMonth() + '-' + now.getDate();
+      if (!S.haidDays[S.myId]) S.haidDays[S.myId] = {};
+      S.haidDays[S.myId][k] = document.getElementById('haid-toggle').checked;
+      save(); renderAll();
+      fbWrite('haidDays/' + S.myId + '/' + k, S.haidDays[S.myId][k]);
+    }
+
+    function renderMtabs(id) {
+      const el = document.getElementById(id); el.innerHTML = '';
+      Object.entries(S.members).forEach(([uid, m]) => {
+        const d = document.createElement('div');
+        d.className = 'mtab' + (viewUid === uid ? ' active' : '');
+        d.textContent = m.name + (uid === S.myId ? ' (saya)' : '');
+        d.onclick = () => { viewUid = uid; renderAll(); if (curTab === 'progress') renderProgress(); };
+        el.appendChild(d);
+      });
+    }
+
+    function renderAll() {
+      const uid = viewUid || S.myId;
+      const isOwn = uid === S.myId;
+      const myMem = S.members[S.myId];
+      // Haid bar — hanya untuk wanita
+      const hb = document.getElementById('haid-bar');
+      if (isOwn && myMem && myMem.gender === 'wanita') {
+        hb.style.display = 'flex';
+        const now = new Date();
+        const k = now.getFullYear() + '-' + now.getMonth() + '-' + now.getDate();
+        document.getElementById('haid-toggle').checked = !!(S.haidDays[S.myId] || {})[k];
+        const cnt = Object.values(S.haidDays[S.myId] || {}).filter(v => v).length;
+        document.getElementById('haid-bar-sub').textContent = cnt > 0 ? cnt + ' hari haid bulan ini' : 'Aktifkan jika sedang haid/uzur';
+      } else { hb.style.display = 'none'; }
+      renderMtabs('mtabs'); renderMtabs('mtabs-prog');
+      const ml = MONTHS[curM] + ' ' + curY;
+      document.getElementById('month-label').textContent = ml;
+      const mlp = document.getElementById('month-label-prog');
+      if (mlp) mlp.textContent = ml;
+      renderTracker(); renderStats();
+    }
+
+    const DAY_NAMES = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const DAY_FULL = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+    function dayLabel(d) {
+      return DAY_FULL[new Date(curY, curM, d).getDay()] + ', ' + d + ' ' + MONTHS[curM] + ' ' + curY;
+    }
+
+    function renderTracker() {
+      const uid = viewUid || S.myId;
+      const isOwn = uid === S.myId;
+      const ams = S.amalan[uid] || [];
+      const days = dim(curY, curM);
+      const now = new Date();
+      const isTM = now.getFullYear() === curY && now.getMonth() === curM;
+      const todayD = isTM ? now.getDate() : days + 1;
+      document.getElementById('add-row').style.display = isOwn ? 'flex' : 'none';
+
+      // Legend haid — sembunyi jika pria
+      const legHaid = document.getElementById('leg-haid');
+      const m = S.members[uid];
+      if (legHaid) legHaid.style.display = (m && m.gender === 'pria') ? 'none' : '';
+
+      // Save scroll positions
+      const scrollPos = [];
+      document.querySelectorAll('#p-tracker .am-scroll').forEach(el => scrollPos.push(el.scrollLeft));
+
+      const el = document.getElementById('amalan-list'); el.innerHTML = '';
+
+      // Header row: date + day name
+      const hdrRow = document.createElement('div'); hdrRow.className = 'am-row am-row-header';
+      const hdrName = document.createElement('div'); hdrName.className = 'am-name'; hdrName.textContent = 'Hari';
+      hdrRow.appendChild(hdrName);
+      const hdrScroll = document.createElement('div'); hdrScroll.className = 'am-scroll';
+      const hdrCells = document.createElement('div'); hdrCells.className = 'am-cells';
+      for (let d = 1; d <= days; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell cell-hdr';
+        cell.innerHTML = '<span>' + d + '</span><span style="font-size:8px;opacity:0.6">' + DAY_NAMES[new Date(curY, curM, d).getDay()] + '</span>';
+        hdrCells.appendChild(cell);
+      }
+      hdrScroll.appendChild(hdrCells); hdrRow.appendChild(hdrScroll); el.appendChild(hdrRow);
+
+      // Amalan rows
+      ams.forEach(am => {
+        const row = document.createElement('div'); row.className = 'am-row';
+        const nd = document.createElement('div'); nd.className = 'am-name'; nd.textContent = am; row.appendChild(nd);
+        const sd = document.createElement('div'); sd.className = 'am-scroll';
+        const cd = document.createElement('div'); cd.className = 'am-cells';
+        for (let d = 1; d <= days; d++) {
+          const s = S.data[dk(curY, curM, d, uid, am)] || 'empty';
+          const isFut = d > todayD;
+          const btn = document.createElement('button');
+          btn.className = 'cell ' + SCLS[s]; btn.textContent = LABELS[s]; btn.title = dayLabel(d);
+          if (isFut || !isOwn) btn.disabled = true;
+          else btn.onclick = () => cycleCell(curY, curM, d, uid, am);
+          cd.appendChild(btn);
+        }
+        sd.appendChild(cd); row.appendChild(sd); el.appendChild(row);
+      });
+
+      // Restore scroll positions
+      document.querySelectorAll('#p-tracker .am-scroll').forEach((el, i) => {
+        if (scrollPos[i] !== undefined) el.scrollLeft = scrollPos[i];
+      });
+    }
+
+    function cycleCell(y, m, d, uid, am) {
+      const k = dk(y, m, d, uid, am);
+      const st = getStatuses(uid);
+      const cur = S.data[k] || 'empty';
+      S.data[k] = st[(st.indexOf(cur) + 1) % st.length];
+      save(); renderTracker(); renderStats();
+      fbWrite('data/' + k, S.data[k]);
+    }
+
+    function renderStats() {
+      const uid = viewUid || S.myId;
+      const ams = S.amalan[uid] || [];
+      const days = dim(curY, curM);
+      const now = new Date();
+      const isTM = now.getFullYear() === curY && now.getMonth() === curM;
+      const todayD = isTM ? now.getDate() : days;
+      let done = 0, miss = 0, haid = 0, skip = 0;
+      ams.forEach(am => {
+        for (let d = 1; d <= todayD; d++) {
+          const s = S.data[dk(curY, curM, d, uid, am)] || 'empty';
+          if (s === 'done') done++; else if (s === 'miss') miss++; else if (s === 'haid') haid++; else if (s === 'skip') skip++;
         }
       });
+      const pct = done + miss > 0 ? Math.round(done / (done + miss) * 100) : 0;
+      const el = document.getElementById('stats-grid'); el.innerHTML = '';
+      const stats = [{ l: 'Terlaksana', v: done, c: 'var(--green)' }, { l: 'Tidak terlaksana', v: miss, c: 'var(--red)' }];
+      const m2 = S.members[uid];
+      if (!m2 || m2.gender !== 'pria') stats.push({ l: 'Haid/uzur', v: haid, c: 'var(--pink)' });
+      stats.push({ l: 'Tingkat ✓', v: pct + '%', c: 'var(--text)' });
+      stats.forEach(s => {
+        const d = document.createElement('div'); d.className = 'scard';
+        d.innerHTML = '<div class="sl">' + s.l + '</div><div class="sv" style="color:' + s.c + '">' + s.v + '</div>';
+        el.appendChild(d);
+      });
     }
-    if(!recovered){
-      S.myId=genId();S.groupName=grp?.groupName||'Keluarga '+n;
-      S.members=grp?.members||{};S.amalan=grp?.amalan||{};
-      S.data=grp?.data||{};S.haidDays=grp?.haidDays||{};
-      S.colorIdx=grp?.colorIdx||{};
-      S.members[S.myId]={name:n,gender:g,joined:Date.now()};
-      S.amalan[S.myId]=[...DEF_AMALAN];
-      S.colorIdx[S.myId]=Object.keys(S.members).length%AVATARS.length;
-      S.haidDays[S.myId]={};
-      fbWrite('members/'+S.myId,S.members[S.myId]);
-      fbWrite('amalan/'+S.myId,S.amalan[S.myId]);
-      fbWrite('colorIdx/'+S.myId,S.colorIdx[S.myId]);
-      fbWrite('haidDays/'+S.myId,S.haidDays[S.myId]);
+
+    function renderProgress() {
+      const uid = viewUid || S.myId;
+      const ams = S.amalan[uid] || [];
+      const days = dim(curY, curM);
+      const now = new Date();
+      const isTM = now.getFullYear() === curY && now.getMonth() === curM;
+      const todayD = isTM ? now.getDate() : days;
+      const el = document.getElementById('prog-bars'); el.innerHTML = '';
+      ams.forEach(am => {
+        let done = 0, miss = 0;
+        for (let d = 1; d <= todayD; d++) {
+          const s = S.data[dk(curY, curM, d, uid, am)] || 'empty';
+          if (s === 'done') done++; else if (s === 'miss') miss++;
+        }
+        const pct = done + miss > 0 ? Math.round(done / (done + miss) * 100) : 0;
+        const r = document.createElement('div'); r.className = 'pb-row';
+        r.innerHTML = '<div class="pb-label" title="' + am + '">' + am + '</div>' +
+          '<div class="pb-track"><div class="pb-fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="pb-pct">' + pct + '%</div>';
+        el.appendChild(r);
+      });
+      const ss = document.getElementById('streak-sec');
+      ss.innerHTML = '<div class="section-label" style="margin-top:20px">Ringkasan bulan ini</div>';
+      let best = 0, cur = 0;
+      for (let d = 1; d <= todayD; d++) {
+        const allOk = ams.every(am => { const s = S.data[dk(curY, curM, d, uid, am)] || 'empty'; return s === 'done' || s === 'haid' || s === 'skip'; });
+        if (allOk && ams.length > 0) cur++; else cur = 0;
+        if (cur > best) best = cur;
+      }
+      const c = document.createElement('div'); c.className = 'card';
+      c.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        '<div class="scard"><div class="sl">Streak terbaik</div><div class="sv" style="color:var(--green)">' + best + ' hari</div></div>' +
+        '<div class="scard"><div class="sl">Total amalan</div><div class="sv">' + ams.length + '</div></div></div>';
+      ss.appendChild(c);
     }
-  }catch(e){
-    // Fallback: Firebase error
-    S.myId=genId();
-    const existing=localStorage.getItem('amalan_group_'+code);
-    if(existing){try{const g2=JSON.parse(existing);Object.assign(S,g2);}catch(e){}}
-    if(!S.groupName)S.groupName='Keluarga';
-    S.members[S.myId]={name:n,gender:g,joined:Date.now()};
-    S.amalan[S.myId]=[...DEF_AMALAN];
-    S.colorIdx[S.myId]=Object.keys(S.members).length%AVATARS.length;
-    S.haidDays[S.myId]={};
-  }
-  viewUid=S.myId;save();
-  localStorage.setItem('amalan_group_'+code,JSON.stringify(S));
-  enterApp();
-  listenGroup(code);
-  if(recovered)toast('Akun "'+n+'" dipulihkan!');
-}
 
-function enterApp(){
-  document.getElementById('screen-onboard').classList.remove('active');
-  document.getElementById('screen-main').classList.add('active');
-  document.getElementById('code-display').textContent=S.groupCode;
-  document.getElementById('group-title').textContent=S.groupName||'Amalan Keluarga';
-  renderAll();
-}
-
-function showTab(tab){
-  ['tracker','progress','group','settings'].forEach(t=>{
-    document.getElementById('t-'+t).classList.remove('active');
-    document.getElementById('p-'+t).style.display='none';
-  });
-  document.getElementById('t-'+tab).classList.add('active');
-  document.getElementById('p-'+tab).style.display='';
-  curTab=tab;
-  if(tab==='progress')renderProgress();
-  if(tab==='group')renderGroup();
-  if(tab==='settings')renderSettings();
-}
-
-function changeMonth(d){
-  curM+=d;
-  if(curM>11){curM=0;curY++;}
-  if(curM<0){curM=11;curY--;}
-  renderAll();
-}
-
-function isHaidDay(uid,y,m,d){return !!(S.haidDays[uid]||{})[y+'-'+m+'-'+d];}
-
-function toggleHaid(){
-  const now=new Date();
-  const k=now.getFullYear()+'-'+now.getMonth()+'-'+now.getDate();
-  if(!S.haidDays[S.myId])S.haidDays[S.myId]={};
-  S.haidDays[S.myId][k]=document.getElementById('haid-toggle').checked;
-  save();renderAll();
-  fbWrite('haidDays/' + S.myId + '/' + k, S.haidDays[S.myId][k]);
-}
-
-function renderMtabs(id){
-  const el=document.getElementById(id);el.innerHTML='';
-  Object.entries(S.members).forEach(([uid,m])=>{
-    const d=document.createElement('div');
-    d.className='mtab'+(viewUid===uid?' active':'');
-    d.textContent=m.name+(uid===S.myId?' (saya)':'');
-    d.onclick=()=>{viewUid=uid;renderAll();if(curTab==='progress')renderProgress();};
-    el.appendChild(d);
-  });
-}
-
-function renderAll(){
-  const uid=viewUid||S.myId;
-  const isOwn=uid===S.myId;
-  const myMem=S.members[S.myId];
-  // Haid bar — hanya untuk wanita
-  const hb=document.getElementById('haid-bar');
-  if(isOwn&&myMem&&myMem.gender==='wanita'){
-    hb.style.display='flex';
-    const now=new Date();
-    const k=now.getFullYear()+'-'+now.getMonth()+'-'+now.getDate();
-    document.getElementById('haid-toggle').checked=!!(S.haidDays[S.myId]||{})[k];
-    const cnt=Object.values(S.haidDays[S.myId]||{}).filter(v=>v).length;
-    document.getElementById('haid-bar-sub').textContent=cnt>0?cnt+' hari haid bulan ini':'Aktifkan jika sedang haid/uzur';
-  }else{hb.style.display='none';}
-  renderMtabs('mtabs');renderMtabs('mtabs-prog');
-  const ml=MONTHS[curM]+' '+curY;
-  document.getElementById('month-label').textContent=ml;
-  const mlp=document.getElementById('month-label-prog');
-  if(mlp)mlp.textContent=ml;
-  renderTracker();renderStats();
-}
-
-const DAY_NAMES = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-const DAY_FULL = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-
-function dayLabel(d) {
-  return DAY_FULL[new Date(curY, curM, d).getDay()] + ', ' + d + ' ' + MONTHS[curM] + ' ' + curY;
-}
-
-function renderTracker(){
-  const uid=viewUid||S.myId;
-  const isOwn=uid===S.myId;
-  const ams=S.amalan[uid]||[];
-  const days=dim(curY,curM);
-  const now=new Date();
-  const isTM=now.getFullYear()===curY&&now.getMonth()===curM;
-  const todayD=isTM?now.getDate():days+1;
-  document.getElementById('add-row').style.display=isOwn?'flex':'none';
-
-  // Save scroll positions
-  const scrollPos = [];
-  document.querySelectorAll('#p-tracker .am-scroll').forEach(el => scrollPos.push(el.scrollLeft));
-
-  const el=document.getElementById('amalan-list');el.innerHTML='';
-
-  // Header row: date + day name
-  const hdrRow=document.createElement('div');hdrRow.className='am-row am-row-header';
-  const hdrName=document.createElement('div');hdrName.className='am-name';hdrName.textContent='Hari';
-  hdrRow.appendChild(hdrName);
-  const hdrScroll=document.createElement('div');hdrScroll.className='am-scroll';
-  const hdrCells=document.createElement('div');hdrCells.className='am-cells';
-  for(let d=1;d<=days;d++){
-    const cell=document.createElement('div');
-    cell.className='cell cell-hdr';
-    cell.innerHTML='<span>'+d+'</span><span style="font-size:8px;opacity:0.6">'+DAY_NAMES[new Date(curY,curM,d).getDay()]+'</span>';
-    hdrCells.appendChild(cell);
-  }
-  hdrScroll.appendChild(hdrCells);hdrRow.appendChild(hdrScroll);el.appendChild(hdrRow);
-
-  // Amalan rows
-  ams.forEach(am=>{
-    const row=document.createElement('div');row.className='am-row';
-    const nd=document.createElement('div');nd.className='am-name';nd.textContent=am;row.appendChild(nd);
-    const sd=document.createElement('div');sd.className='am-scroll';
-    const cd=document.createElement('div');cd.className='am-cells';
-    for(let d=1;d<=days;d++){
-      const s=S.data[dk(curY,curM,d,uid,am)]||'empty';
-      const isFut=d>todayD;
-      const btn=document.createElement('button');
-      btn.className='cell '+SCLS[s];btn.textContent=LABELS[s];btn.title=dayLabel(d);
-      if(isFut||!isOwn)btn.disabled=true;
-      else btn.onclick=()=>cycleCell(curY,curM,d,uid,am);
-      cd.appendChild(btn);
+    function renderGroup() {
+      const el = document.getElementById('member-list'); el.innerHTML = '';
+      Object.entries(S.members).forEach(([uid, m], i) => {
+        const a = av(uid);
+        const haidNow = Object.values(S.haidDays[uid] || {}).some(v => v);
+        const genderBadge = m.gender === 'pria' ? '<span class="badge badge-pria">👨 Pria</span>' : '<span class="badge badge-wanita">👩 Wanita</span>';
+        const item = document.createElement('div'); item.className = 'member-item';
+        item.innerHTML = '<div class="avatar" style="background:' + a.bg + ';color:' + a.col + '">' + initials(m.name) + '</div>' +
+          '<div style="flex:1"><div class="mi-name">' + m.name + (uid === S.myId ? ' <span style="font-size:11px;font-weight:400;color:var(--text2)">(kamu)</span>' : '') + '</div>' +
+          '<div class="mi-role">' + (i === 0 ? '<span class="badge badge-admin">Admin</span>' : '') +
+          genderBadge + (haidNow ? '<span class="badge badge-haid">Haid</span>' : '') + '</div></div>';
+        el.appendChild(item);
+      });
     }
-    sd.appendChild(cd);row.appendChild(sd);el.appendChild(row);
-  });
 
-  // Restore scroll positions
-  document.querySelectorAll('#p-tracker .am-scroll').forEach((el,i)=>{
-    if(scrollPos[i]!==undefined)el.scrollLeft=scrollPos[i];
-  });
-}
-
-function cycleCell(y,m,d,uid,am){
-  const k=dk(y,m,d,uid,am);
-  const cur=S.data[k]||'empty';
-  S.data[k]=STATUSES[(STATUSES.indexOf(cur)+1)%STATUSES.length];
-  save();renderTracker();renderStats();
-  fbWrite('data/' + k, S.data[k]);
-}
-
-function renderStats(){
-  const uid=viewUid||S.myId;
-  const ams=S.amalan[uid]||[];
-  const days=dim(curY,curM);
-  const now=new Date();
-  const isTM=now.getFullYear()===curY&&now.getMonth()===curM;
-  const todayD=isTM?now.getDate():days;
-  let done=0,miss=0,haid=0,skip=0;
-  ams.forEach(am=>{
-    for(let d=1;d<=todayD;d++){
-      const s=S.data[dk(curY,curM,d,uid,am)]||'empty';
-      if(s==='done')done++;else if(s==='miss')miss++;else if(s==='haid')haid++;else if(s==='skip')skip++;
+    function renderSettings() {
+      const a = av(S.myId);
+      const myMem = S.members[S.myId];
+      const myName = S.myName;
+      const myGender = myMem?.gender || 'wanita';
+      const myAv = document.getElementById('my-av');
+      myAv.style.background = a.bg; myAv.style.color = a.col; myAv.style.width = '48px'; myAv.style.height = '48px'; myAv.style.fontSize = '16px';
+      myAv.textContent = initials(myName);
+      document.getElementById('my-name-disp').textContent = myName + (myGender === 'pria' ? ' 👨' : ' 👩');
+      // Gender radio
+      const pria = document.getElementById('gender-pria-label')?.querySelector('input');
+      const wanita = document.getElementById('gender-wanita-label')?.querySelector('input');
+      if (pria) pria.checked = myGender === 'pria';
+      if (wanita) wanita.checked = myGender === 'wanita';
+      const cp = document.getElementById('color-picker'); cp.innerHTML = '';
+      AVATARS.forEach((c, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'color-swatch' + (S.colorIdx[S.myId] === i ? ' selected' : '');
+        btn.style.cssText = 'background:' + c.bg + ';color:' + c.col + ';border-color:' + (S.colorIdx[S.myId] === i ? c.col : 'transparent');
+        btn.textContent = initials(S.myName);
+        btn.onclick = () => { S.colorIdx[S.myId] = i; save(); renderSettings(); fbWrite('colorIdx/' + S.myId, S.colorIdx[S.myId]); };
+        cp.appendChild(btn);
+      });
+      const amEl = document.getElementById('am-manage'); amEl.innerHTML = '';
+      (S.amalan[S.myId] || []).forEach((am, i) => {
+        const r = document.createElement('div'); r.className = 'am-manage-row';
+        r.innerHTML = '<span style="font-size:13px;font-weight:500">' + am + '</span>' +
+          '<div style="display:flex;gap:4px">' +
+          '<button onclick="editAm(' + i + ')" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer;color:var(--text2);font-size:13px">✏️</button>' +
+          '<button onclick="rmAm(' + i + ')" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer;color:var(--red);font-size:13px">🗑</button>' +
+          '</div>';
+        amEl.appendChild(r);
+      });
+      if (!(S.amalan[S.myId] || []).length) { amEl.innerHTML = '<p style="color:var(--text2);font-size:13px;text-align:center;padding:12px 0">Belum ada amalan. Tambah di tab Amalan.</p>'; }
     }
-  });
-  const pct=done+miss>0?Math.round(done/(done+miss)*100):0;
-  const el=document.getElementById('stats-grid');el.innerHTML='';
-  [{l:'Terlaksana',v:done,c:'var(--green)'},{l:'Tidak terlaksana',v:miss,c:'var(--red)'},
-   {l:'Haid/uzur',v:haid,c:'var(--pink)'},{l:'Tingkat ✓',v:pct+'%',c:'var(--text)'}].forEach(s=>{
-    const d=document.createElement('div');d.className='scard';
-    d.innerHTML='<div class="sl">'+s.l+'</div><div class="sv" style="color:'+s.c+'">'+s.v+'</div>';
-    el.appendChild(d);
-  });
-}
 
-function renderProgress(){
-  const uid=viewUid||S.myId;
-  const ams=S.amalan[uid]||[];
-  const days=dim(curY,curM);
-  const now=new Date();
-  const isTM=now.getFullYear()===curY&&now.getMonth()===curM;
-  const todayD=isTM?now.getDate():days;
-  const el=document.getElementById('prog-bars');el.innerHTML='';
-  ams.forEach(am=>{
-    let done=0,miss=0;
-    for(let d=1;d<=todayD;d++){
-      const s=S.data[dk(curY,curM,d,uid,am)]||'empty';
-      if(s==='done')done++;else if(s==='miss')miss++;
+    function addAmalan() {
+      const inp = document.getElementById('new-amalan');
+      const val = inp.value.trim(); if (!val) return;
+      if (!S.amalan[S.myId]) S.amalan[S.myId] = [];
+      if (S.amalan[S.myId].includes(val)) { toast('Amalan sudah ada'); return; }
+      S.amalan[S.myId].push(val); inp.value = ''; save(); renderAll();
+      fbWrite('amalan/' + S.myId, S.amalan[S.myId]);
     }
-    const pct=done+miss>0?Math.round(done/(done+miss)*100):0;
-    const r=document.createElement('div');r.className='pb-row';
-    r.innerHTML='<div class="pb-label" title="'+am+'">'+am+'</div>'+
-      '<div class="pb-track"><div class="pb-fill" style="width:'+pct+'%"></div></div>'+
-      '<div class="pb-pct">'+pct+'%</div>';
-    el.appendChild(r);
-  });
-  const ss=document.getElementById('streak-sec');
-  ss.innerHTML='<div class="section-label" style="margin-top:20px">Ringkasan bulan ini</div>';
-  let best=0,cur=0;
-  for(let d=1;d<=todayD;d++){
-    const allOk=ams.every(am=>{const s=S.data[dk(curY,curM,d,uid,am)]||'empty';return s==='done'||s==='haid'||s==='skip';});
-    if(allOk&&ams.length>0)cur++;else cur=0;
-    if(cur>best)best=cur;
-  }
-  const c=document.createElement('div');c.className='card';
-  c.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
-    '<div class="scard"><div class="sl">Streak terbaik</div><div class="sv" style="color:var(--green)">'+best+' hari</div></div>'+
-    '<div class="scard"><div class="sl">Total amalan</div><div class="sv">'+ams.length+'</div></div></div>';
-  ss.appendChild(c);
-}
 
-function renderGroup(){
-  const el=document.getElementById('member-list');el.innerHTML='';
-  Object.entries(S.members).forEach(([uid,m],i)=>{
-    const a=av(uid);
-    const haidNow=Object.values(S.haidDays[uid]||{}).some(v=>v);
-    const genderBadge=m.gender==='pria'?'<span class="badge badge-pria">👨 Pria</span>':'<span class="badge badge-wanita">👩 Wanita</span>';
-    const item=document.createElement('div');item.className='member-item';
-    item.innerHTML='<div class="avatar" style="background:'+a.bg+';color:'+a.col+'">'+initials(m.name)+'</div>'+
-      '<div style="flex:1"><div class="mi-name">'+m.name+(uid===S.myId?' <span style="font-size:11px;font-weight:400;color:var(--text2)">(kamu)</span>':'')+'</div>'+
-      '<div class="mi-role">'+(i===0?'<span class="badge badge-admin">Admin</span>':'')+
-      genderBadge+(haidNow?'<span class="badge badge-haid">Haid</span>':'')+'</div></div>';
-    el.appendChild(item);
-  });
-}
+    function rmAm(i) {
+      if (!confirm('Hapus amalan "' + S.amalan[S.myId][i] + '"?')) return;
+      S.amalan[S.myId].splice(i, 1); save(); renderAll(); renderSettings();
+      fbWrite('amalan/' + S.myId, S.amalan[S.myId]);
+    }
 
-function renderSettings(){
-  const a=av(S.myId);
-  const myMem=S.members[S.myId];
-  const myName=S.myName;
-  const myGender=myMem?.gender||'wanita';
-  const myAv=document.getElementById('my-av');
-  myAv.style.background=a.bg;myAv.style.color=a.col;myAv.style.width='48px';myAv.style.height='48px';myAv.style.fontSize='16px';
-  myAv.textContent=initials(myName);
-  document.getElementById('my-name-disp').textContent=myName+(myGender==='pria'?' 👨':' 👩');
-  // Gender radio
-  const pria=document.getElementById('gender-pria-label')?.querySelector('input');
-  const wanita=document.getElementById('gender-wanita-label')?.querySelector('input');
-  if(pria)pria.checked=myGender==='pria';
-  if(wanita)wanita.checked=myGender==='wanita';
-  const cp=document.getElementById('color-picker');cp.innerHTML='';
-  AVATARS.forEach((c,i)=>{
-    const btn=document.createElement('button');
-    btn.className='color-swatch'+(S.colorIdx[S.myId]===i?' selected':'');
-    btn.style.cssText='background:'+c.bg+';color:'+c.col+';border-color:'+(S.colorIdx[S.myId]===i?c.col:'transparent');
-    btn.textContent=initials(S.myName);
-    btn.onclick=()=>{S.colorIdx[S.myId]=i;save();renderSettings();fbWrite('colorIdx/' + S.myId, S.colorIdx[S.myId]);};
-    cp.appendChild(btn);
-  });
-  const amEl=document.getElementById('am-manage');amEl.innerHTML='';
-  (S.amalan[S.myId]||[]).forEach((am,i)=>{
-    const r=document.createElement('div');r.className='am-manage-row';
-    r.innerHTML='<span style="font-size:13px;font-weight:500">'+am+'</span>'+
-      '<div style="display:flex;gap:4px">'+
-      '<button onclick="editAm('+i+')" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer;color:var(--text2);font-size:13px">✏️</button>'+
-      '<button onclick="rmAm('+i+')" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer;color:var(--red);font-size:13px">🗑</button>'+
-      '</div>';
-    amEl.appendChild(r);
-  });
-  if(!(S.amalan[S.myId]||[]).length){amEl.innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:12px 0">Belum ada amalan. Tambah di tab Amalan.</p>';}
-}
+    function editAm(i) {
+      const n = prompt('Edit nama amalan:', S.amalan[S.myId][i]);
+      if (!n || !n.trim()) return;
+      S.amalan[S.myId][i] = n.trim(); save(); renderAll(); renderSettings();
+      fbWrite('amalan/' + S.myId, S.amalan[S.myId]);
+    }
 
-function addAmalan(){
-  const inp=document.getElementById('new-amalan');
-  const val=inp.value.trim();if(!val)return;
-  if(!S.amalan[S.myId])S.amalan[S.myId]=[];
-  if(S.amalan[S.myId].includes(val)){toast('Amalan sudah ada');return;}
-  S.amalan[S.myId].push(val);inp.value='';save();renderAll();
-  fbWrite('amalan/' + S.myId, S.amalan[S.myId]);
-}
+    function saveName() {
+      const n = document.getElementById('edit-name').value.trim();
+      if (!n) return;
+      S.myName = n; S.members[S.myId].name = n;
+      document.getElementById('edit-name').value = ''; save(); renderAll(); renderSettings();
+      fbWrite('members/' + S.myId, S.members[S.myId]);
+    }
 
-function rmAm(i){
-  if(!confirm('Hapus amalan "'+S.amalan[S.myId][i]+'"?'))return;
-  S.amalan[S.myId].splice(i,1);save();renderAll();renderSettings();
-  fbWrite('amalan/' + S.myId, S.amalan[S.myId]);
-}
+    function saveGender() {
+      const g = document.querySelector('input[name="gender-settings"]:checked')?.value;
+      if (!g || !S.members[S.myId]) return;
+      S.members[S.myId].gender = g;
+      save(); renderAll(); renderSettings();
+      fbWrite('members/' + S.myId, S.members[S.myId]);
+    }
 
-function editAm(i){
-  const n=prompt('Edit nama amalan:',S.amalan[S.myId][i]);
-  if(!n||!n.trim())return;
-  S.amalan[S.myId][i]=n.trim();save();renderAll();renderSettings();
-  fbWrite('amalan/' + S.myId, S.amalan[S.myId]);
-}
+    function copyCode() {
+      try { navigator.clipboard.writeText(S.groupCode); } catch (e) { }
+      toast('Kode "' + S.groupCode + '" disalin! ✓');
+    }
 
-function saveName(){
-  const n=document.getElementById('edit-name').value.trim();
-  if(!n)return;
-  S.myName=n;S.members[S.myId].name=n;
-  document.getElementById('edit-name').value='';save();renderAll();renderSettings();
-  fbWrite('members/' + S.myId, S.members[S.myId]);
-}
+    function shareCode() {
+      const msg = 'Assalamualaikum! Ayo kita track amalan bareng di aplikasi My Amal 🌙\nKode grup kita: *' + S.groupCode + '*\n\nCaranya: buka aplikasi → masukkan nama kamu → klik "Gabung grup" → masukkan kode ini.';
+      const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
+      window.open(url, '_blank');
+    }
 
-function saveGender(){
-  const g=document.querySelector('input[name="gender-settings"]:checked')?.value;
-  if(!g||!S.members[S.myId])return;
-  S.members[S.myId].gender=g;
-  save();renderAll();renderSettings();
-  fbWrite('members/' + S.myId, S.members[S.myId]);
-}
+    function logout() {
+      if (!confirm('Keluar dari akun? Data tetap tersimpan di HP.')) return;
+      document.getElementById('screen-main').classList.remove('active');
+      document.getElementById('screen-onboard').classList.add('active');
+      document.getElementById('inp-name').value = '';
+      document.getElementById('inp-code').value = '';
+      S = { myId: null, myName: '', groupCode: '', groupName: '', members: {}, amalan: {}, data: {}, haidDays: {}, colorIdx: {} };
+      S = JSON.parse(localStorage.getItem('amalan_state_v2')) || S;
+    }
 
-function copyCode(){
-  try{navigator.clipboard.writeText(S.groupCode);}catch(e){}
-  toast('Kode "'+S.groupCode+'" disalin! ✓');
-}
+    function deleteAccount() {
+      if (!confirm('Yakin mau hapus akun & semua data? Tindakan ini permanen.')) return;
+      if (fbDb && S.groupCode && S.myId) {
+        fbDb.ref('groups/' + S.groupCode + '/members/' + S.myId).remove().catch(e => console.error('Firebase:', e));
+        fbDb.ref('groups/' + S.groupCode + '/amalan/' + S.myId).remove().catch(e => console.error('Firebase:', e));
+        fbDb.ref('groups/' + S.groupCode + '/colorIdx/' + S.myId).remove().catch(e => console.error('Firebase:', e));
+        fbDb.ref('groups/' + S.groupCode + '/haidDays/' + S.myId).remove().catch(e => console.error('Firebase:', e));
+      }
+      localStorage.removeItem('amalan_state_v2');
+      location.reload();
+    }
 
-function shareCode(){
-  const msg='Assalamualaikum! Ayo kita track amalan bareng di aplikasi My Amal 🌙\nKode grup kita: *'+S.groupCode+'*\n\nCaranya: buka aplikasi → masukkan nama kamu → klik "Gabung grup" → masukkan kode ini.';
-  const url='https://wa.me/?text='+encodeURIComponent(msg);
-  window.open(url,'_blank');
-}
+    function exportData() {
+      const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'my-amal-backup.json';
+      a.click(); URL.revokeObjectURL(a.href);
+      toast('Data berhasil di-export!');
+    }
 
-function logout(){
-  if(!confirm('Keluar dari akun? Data tetap tersimpan di HP.'))return;
-  document.getElementById('screen-main').classList.remove('active');
-  document.getElementById('screen-onboard').classList.add('active');
-  document.getElementById('inp-name').value='';
-  document.getElementById('inp-code').value='';
-  S={myId:null,myName:'',groupCode:'',groupName:'',members:{},amalan:{},data:{},haidDays:{},colorIdx:{}};
-  S=JSON.parse(localStorage.getItem('amalan_state_v2'))||S;
-}
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
 
-function deleteAccount(){
-  if(!confirm('Yakin mau hapus akun & semua data? Tindakan ini permanen.'))return;
-  if(fbDb&&S.groupCode&&S.myId){
-    fbDb.ref('groups/'+S.groupCode+'/members/'+S.myId).remove().catch(e=>console.error('Firebase:',e));
-    fbDb.ref('groups/'+S.groupCode+'/amalan/'+S.myId).remove().catch(e=>console.error('Firebase:',e));
-    fbDb.ref('groups/'+S.groupCode+'/colorIdx/'+S.myId).remove().catch(e=>console.error('Firebase:',e));
-    fbDb.ref('groups/'+S.groupCode+'/haidDays/'+S.myId).remove().catch(e=>console.error('Firebase:',e));
-  }
-  localStorage.removeItem('amalan_state_v2');
-  location.reload();
-}
+    // Init
+    if (load() && S.myId && S.members[S.myId]) {
+      migrateOldData();
+      viewUid = S.myId;
+      initFirebase();
+      if (S.groupCode) listenGroup(S.groupCode);
+      enterApp();
+    }
 
-function exportData(){
-  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='my-amal-backup.json';
-  a.click();URL.revokeObjectURL(a.href);
-  toast('Data berhasil di-export!');
-}
-
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
-}
-
-// Init
-if(load()&&S.myId&&S.members[S.myId]){
-  migrateOldData();
-  viewUid=S.myId;
-  initFirebase();
-  if (S.groupCode) listenGroup(S.groupCode);
-  enterApp();
-}
-
-// Service Worker
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
-</script>
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => { });
+    }
+  </script>
 </body>
+
 </html>
