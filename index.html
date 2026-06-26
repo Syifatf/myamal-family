@@ -1593,7 +1593,9 @@
     }
 
     function shareCode() {
-      const msg = 'Assalamualaikum! Ayo kita track amalan bareng di aplikasi My Amal 🌙\nKode grup kita: *' + S.groupCode + '*\n\nCaranya: buka aplikasi → masukkan nama kamu → klik "Gabung grup" → masukkan kode ini.';
+      const base = location.origin + location.pathname.replace(/\/[^/]*$/, '/');
+      const link = base + '?join=' + S.groupCode;
+      const msg = 'Assalamualaikum! Ayo track amalan bareng di My Amal 🌙\nKode grup: *' + S.groupCode + '*\n\n🔗 Buka langsung:\n' + link + '\n\n📲 Download APK:\n' + base + 'my-amal.apk';
       const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
       window.open(url, '_blank');
     }
@@ -1636,6 +1638,14 @@
     }
 
     // Init
+    // Cek URL parameter ?join=CODE untuk auto-fill
+    const params = new URLSearchParams(location.search);
+    const joinCode = params.get('join');
+    if (joinCode) {
+      const inp = document.getElementById('inp-code');
+      if (inp) inp.value = joinCode.toUpperCase();
+    }
+
     if (load() && S.myId && S.members[S.myId]) {
       migrateOldData();
       viewUid = S.myId;
