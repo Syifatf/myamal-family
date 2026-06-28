@@ -763,7 +763,7 @@
       display: none
     }
 
-    .gender-opt:has(input:checked) {
+    .gender-opt.gender-active {
       border-color: var(--green);
       background: var(--green-light);
       color: var(--green)
@@ -1527,6 +1527,7 @@
       const wanita = document.getElementById('gender-wanita-label')?.querySelector('input');
       if (pria) pria.checked = myGender === 'pria';
       if (wanita) wanita.checked = myGender === 'wanita';
+      syncGenderTabs();
       const cp = document.getElementById('color-picker'); cp.innerHTML = '';
       AVATARS.forEach((c, i) => {
         const btn = document.createElement('button');
@@ -1608,6 +1609,7 @@
       document.getElementById('inp-code').value = '';
       S = { myId: null, myName: '', groupCode: '', groupName: '', members: {}, amalan: {}, data: {}, haidDays: {}, colorIdx: {} };
       S = JSON.parse(localStorage.getItem('amalan_state_v2')) || S;
+      syncGenderTabs();
     }
 
     function deleteAccount() {
@@ -1637,6 +1639,26 @@
       setTimeout(() => t.classList.remove('show'), 2500);
     }
 
+    function initGenderTabs() {
+      document.querySelectorAll('.gender-opt').forEach(function(el) {
+        var inp = el.querySelector('input');
+        if (inp && inp.checked) el.classList.add('gender-active');
+        if (inp) {
+          inp.addEventListener('change', function() {
+            document.querySelectorAll('.gender-opt').forEach(function(l) { l.classList.remove('gender-active') });
+            if (this.checked) this.closest('.gender-opt').classList.add('gender-active');
+          });
+        }
+      });
+    }
+
+    function syncGenderTabs() {
+      document.querySelectorAll('.gender-opt input').forEach(function(inp) {
+        var parent = inp.closest('.gender-opt');
+        if (parent) parent.classList.toggle('gender-active', inp.checked);
+      });
+    }
+
     // Init
     // Cek URL parameter ?join=CODE untuk auto-fill
     const params = new URLSearchParams(location.search);
@@ -1645,6 +1667,8 @@
       const inp = document.getElementById('inp-code');
       if (inp) inp.value = joinCode.toUpperCase();
     }
+
+    initGenderTabs();
 
     if (load() && S.myId && S.members[S.myId]) {
       migrateOldData();
